@@ -19,13 +19,20 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
 
   const applyTheme = (newTheme: Theme) => {
     const root = document.documentElement;
+    let isDark: boolean;
     if (newTheme === 'system') {
-      const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-      root.setAttribute('data-theme', prefersDark ? 'dark' : 'light');
-      setResolvedTheme(prefersDark ? 'dark' : 'light');
+      isDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+      root.setAttribute('data-theme', isDark ? 'dark' : 'light');
     } else {
+      isDark = newTheme === 'dark';
       root.setAttribute('data-theme', newTheme);
-      setResolvedTheme(newTheme);
+    }
+    setResolvedTheme(isDark ? 'dark' : 'light');
+    // Also toggle .dark class for CSS selectors
+    if (isDark) {
+      root.classList.add('dark');
+    } else {
+      root.classList.remove('dark');
     }
   };
 
