@@ -1,5 +1,5 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
-import { getSupabaseClient } from './_supabase';
+import { getSupabaseClient, verifySupabaseToken, extractTokenFromHeader } from './_supabase';
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   if (req.method !== 'GET') {
@@ -7,7 +7,18 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   }
 
   const supabase = getSupabaseClient();
-  const userId = req.headers['x-user-id'] as string || 'demo-user';
+
+  // Verify Supabase JWT from Authorization header
+  const token = extractTokenFromHeader(req.headers.authorization as string | undefined);
+  if (!token) {
+    return res.status(401).json({ error: 'Missing Authorization header with Bearer token' });
+  }
+
+  const userId = await verifySupabaseToken(token);
+  if (!userId) {
+    return res.status(401).json({ error: 'Invalid or expired token' });
+  }
+
   const days = parseInt(req.query.days as string) || 30;
   const startDate = new Date();
   startDate.setDate(startDate.getDate() - days);

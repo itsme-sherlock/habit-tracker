@@ -6,16 +6,16 @@
     "version": "1.0.0"
   },
   "servers": [
-    { "url": "https://your-vercel-app.vercel.app/api", "description": "Production" },
+    { "url": "https://habit-tracker-bfacxh5tm-aravindhans-projects-a59e013a.vercel.app/api", "description": "Production" },
     { "url": "http://localhost:3000/api", "description": "Local development" }
   ],
   "components": {
     "securitySchemes": {
-      "UserIdHeader": {
-        "type": "apiKey",
-        "in": "header",
-        "name": "x-user-id",
-        "description": "User ID for multi-tenant access"
+      "SupabaseJWT": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT",
+        "description": "Supabase access token (JWT) from user login"
       }
     },
     "schemas": {
@@ -157,18 +157,19 @@
       }
     }
   },
-  "security": [{ "UserIdHeader": [] }],
+  "security": [{ "SupabaseJWT": [] }],
   "paths": {
     "/habits": {
       "get": {
         "operationId": "listHabits",
         "summary": "List all habits",
-        "description": "Returns all habits for the user, ordered by priority",
+        "description": "Returns all habits for the authenticated user, ordered by priority",
         "responses": {
           "200": {
             "description": "List of habits",
             "content": { "application/json": { "schema": { "type": "array", "items": { "$ref": "#/components/schemas/Habit" } } } }
-          }
+          },
+          "401": { "description": "Unauthorized - invalid or missing JWT" }
         }
       },
       "post": {
@@ -180,7 +181,8 @@
           "content": { "application/json": { "schema": { "$ref": "#/components/schemas/CreateHabitInput" } } }
         },
         "responses": {
-          "201": { "description": "Created habit", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Habit" } } } }
+          "201": { "description": "Created habit", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Habit" } } } },
+          "401": { "description": "Unauthorized - invalid or missing JWT" }
         }
       }
     },
@@ -195,7 +197,8 @@
           "content": { "application/json": { "schema": { "$ref": "#/components/schemas/UpdateHabitInput" } } }
         },
         "responses": {
-          "200": { "description": "Updated habit", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Habit" } } } }
+          "200": { "description": "Updated habit", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Habit" } } } },
+          "401": { "description": "Unauthorized - invalid or missing JWT" }
         }
       },
       "delete": {
@@ -203,7 +206,10 @@
         "summary": "Delete a habit",
         "description": "Permanently remove a habit",
         "parameters": [{ "name": "id", "in": "path", "required": true, "schema": { "type": "string" } }],
-        "responses": { "204": { "description": "Deleted" } }
+        "responses": {
+          "204": { "description": "Deleted" },
+          "401": { "description": "Unauthorized - invalid or missing JWT" }
+        }
       }
     },
     "/tasks": {
@@ -217,7 +223,8 @@
           { "name": "endDate", "in": "query", "schema": { "type": "string", "format": "date" }, "description": "Range end (YYYY-MM-DD)" }
         ],
         "responses": {
-          "200": { "description": "List of tasks", "content": { "application/json": { "schema": { "type": "array", "items": { "$ref": "#/components/schemas/StudyTask" } } } } }
+          "200": { "description": "List of tasks", "content": { "application/json": { "schema": { "type": "array", "items": { "$ref": "#/components/schemas/StudyTask" } } } } },
+          "401": { "description": "Unauthorized - invalid or missing JWT" }
         }
       },
       "post": {
@@ -229,7 +236,8 @@
           "content": { "application/json": { "schema": { "$ref": "#/components/schemas/CreateTaskInput" } } }
         },
         "responses": {
-          "201": { "description": "Created task", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/StudyTask" } } } }
+          "201": { "description": "Created task", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/StudyTask" } } } },
+          "401": { "description": "Unauthorized - invalid or missing JWT" }
         }
       }
     },
@@ -244,14 +252,18 @@
           "content": { "application/json": { "schema": { "$ref": "#/components/schemas/UpdateTaskInput" } } }
         },
         "responses": {
-          "200": { "description": "Updated task", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/StudyTask" } } } }
+          "200": { "description": "Updated task", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/StudyTask" } } } },
+          "401": { "description": "Unauthorized - invalid or missing JWT" }
         }
       },
       "delete": {
         "operationId": "deleteTask",
         "summary": "Delete a task",
         "parameters": [{ "name": "id", "in": "path", "required": true, "schema": { "type": "string" } }],
-        "responses": { "204": { "description": "Deleted" } }
+        "responses": {
+          "204": { "description": "Deleted" },
+          "401": { "description": "Unauthorized - invalid or missing JWT" }
+        }
       }
     },
     "/completions": {
@@ -262,7 +274,8 @@
           { "name": "date", "in": "query", "schema": { "type": "string", "format": "date" }, "description": "Specific date (YYYY-MM-DD)" }
         ],
         "responses": {
-          "200": { "description": "List of completions", "content": { "application/json": { "schema": { "type": "array", "items": { "$ref": "#/components/schemas/DailyCompletion" } } } } }
+          "200": { "description": "List of completions", "content": { "application/json": { "schema": { "type": "array", "items": { "$ref": "#/components/schemas/DailyCompletion" } } } } },
+          "401": { "description": "Unauthorized - invalid or missing JWT" }
         }
       },
       "post": {
@@ -274,7 +287,8 @@
           "content": { "application/json": { "schema": { "$ref": "#/components/schemas/CreateCompletionInput" } } }
         },
         "responses": {
-          "201": { "description": "Saved completion", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/DailyCompletion" } } } }
+          "201": { "description": "Saved completion", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/DailyCompletion" } } } },
+          "401": { "description": "Unauthorized - invalid or missing JWT" }
         }
       }
     },
@@ -287,7 +301,8 @@
           { "name": "days", "in": "query", "schema": { "type": "integer", "default": 30 }, "description": "Period in days" }
         ],
         "responses": {
-          "200": { "description": "Statistics summary", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/StatsResponse" } } } }
+          "200": { "description": "Statistics summary", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/StatsResponse" } } } },
+          "401": { "description": "Unauthorized - invalid or missing JWT" }
         }
       }
     }

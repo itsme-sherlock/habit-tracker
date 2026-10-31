@@ -1,5 +1,5 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
-import { getSupabaseClient, type SupabaseHabit } from './_supabase';
+import { getSupabaseClient, type SupabaseHabit, verifySupabaseToken, extractTokenFromHeader } from './_supabase';
 
 interface CreateHabitInput {
   name: string;
@@ -42,8 +42,16 @@ function toSupabaseHabit(h: CreateHabitInput, userId: string) {
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   const supabase = getSupabaseClient();
 
-  // Get user from auth header (simplified - in production use proper auth)
-  const userId = req.headers['x-user-id'] as string || 'demo-user';
+  // Verify Supabase JWT from Authorization header
+  const token = extractTokenFromHeader(req.headers.authorization as string | undefined);
+  if (!token) {
+    return res.status(401).json({ error: 'Missing Authorization header with Bearer token' });
+  }
+
+  const userId = await verifySupabaseToken(token);
+  if (!userId) {
+    return res.status(401).json({ error: 'Invalid or expired token' });
+  }
 
   try {
     switch (req.method) {
