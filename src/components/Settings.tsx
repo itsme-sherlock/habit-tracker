@@ -3,6 +3,7 @@ import { Moon, Sun, Monitor, Download, Upload, Trash2, RefreshCw, AlertTriangle 
 import type { AppSettings } from '../types';
 import { getSettings, saveSettings, exportAllData, importAllData, clearAllData } from '../services/db';
 import { NotificationSettingsComponent } from './NotificationSettings';
+import { useTheme } from '../context/ThemeContext';
 
 interface SettingsProps {
   settings: AppSettings;
@@ -10,7 +11,7 @@ interface SettingsProps {
 }
 
 export function SettingsComponent({ settings, onSettingsChange }: SettingsProps) {
-  const [theme, setTheme] = useState(settings.theme);
+  const { theme, setTheme } = useTheme();
   const [exporting, setExporting] = useState(false);
   const [importing, setImporting] = useState(false);
   const [showDangerZone, setShowDangerZone] = useState(false);
@@ -20,22 +21,7 @@ export function SettingsComponent({ settings, onSettingsChange }: SettingsProps)
     const newSettings = { ...settings, theme: newTheme };
     onSettingsChange(newSettings);
     saveSettings(newSettings);
-    applyTheme(newTheme);
   };
-
-  const applyTheme = (newTheme: string) => {
-    const root = document.documentElement;
-    if (newTheme === 'system') {
-      const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-      root.setAttribute('data-theme', prefersDark ? 'dark' : 'light');
-    } else {
-      root.setAttribute('data-theme', newTheme);
-    }
-  };
-
-  useEffect(() => {
-    applyTheme(settings.theme);
-  }, [settings.theme]);
 
   const handleExport = async () => {
     setExporting(true);
