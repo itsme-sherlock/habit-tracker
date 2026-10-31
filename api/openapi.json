@@ -1,0 +1,295 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Habit Tracker API",
+    "description": "REST API for Habit Tracker PWA - enables AI agents to manage habits, tasks, and completions",
+    "version": "1.0.0"
+  },
+  "servers": [
+    { "url": "https://your-vercel-app.vercel.app/api", "description": "Production" },
+    { "url": "http://localhost:3000/api", "description": "Local development" }
+  ],
+  "components": {
+    "securitySchemes": {
+      "UserIdHeader": {
+        "type": "apiKey",
+        "in": "header",
+        "name": "x-user-id",
+        "description": "User ID for multi-tenant access"
+      }
+    },
+    "schemas": {
+      "Habit": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string" },
+          "name": { "type": "string" },
+          "description": { "type": "string", "nullable": true },
+          "frequency": { "type": "string", "enum": ["daily"] },
+          "targetCount": { "type": "integer", "minimum": 1 },
+          "unit": { "type": "string" },
+          "createdAt": { "type": "string", "format": "date-time" },
+          "order": { "type": "integer" },
+          "updatedAt": { "type": "string", "format": "date-time", "nullable": true }
+        },
+        "required": ["id", "name", "frequency", "targetCount", "unit", "createdAt", "order"]
+      },
+      "CreateHabitInput": {
+        "type": "object",
+        "properties": {
+          "name": { "type": "string", "description": "Habit name (e.g., 'Drink water', 'Exercise')" },
+          "description": { "type": "string", "nullable": true },
+          "targetCount": { "type": "integer", "minimum": 1, "description": "How many times per day" },
+          "unit": { "type": "string", "description": "Unit of measurement (e.g., 'times', 'hours', 'minutes', 'glasses')" },
+          "frequency": { "type": "string", "enum": ["daily"], "default": "daily" }
+        },
+        "required": ["name", "targetCount", "unit"]
+      },
+      "UpdateHabitInput": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string" },
+          "name": { "type": "string" },
+          "description": { "type": "string", "nullable": true },
+          "targetCount": { "type": "integer", "minimum": 1 },
+          "unit": { "type": "string" },
+          "frequency": { "type": "string", "enum": ["daily"] }
+        },
+        "required": ["id"]
+      },
+      "StudyTask": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string" },
+          "date": { "type": "string", "format": "date" },
+          "title": { "type": "string" },
+          "description": { "type": "string", "nullable": true },
+          "durationMinutes": { "type": "integer", "minimum": 1 },
+          "category": { "type": "string", "enum": ["study", "practice", "review", "mock-exam"] },
+          "completed": { "type": "boolean" },
+          "completedAt": { "type": "string", "format": "date-time", "nullable": true },
+          "createdAt": { "type": "string", "format": "date-time" },
+          "updatedAt": { "type": "string", "format": "date-time", "nullable": true }
+        },
+        "required": ["id", "date", "title", "durationMinutes", "category", "completed", "createdAt"]
+      },
+      "CreateTaskInput": {
+        "type": "object",
+        "properties": {
+          "date": { "type": "string", "format": "date", "description": "YYYY-MM-DD" },
+          "title": { "type": "string", "description": "Task title (e.g., 'BigQuery fundamentals', 'Practice SQL')" },
+          "description": { "type": "string", "nullable": true },
+          "durationMinutes": { "type": "integer", "minimum": 5, "maximum": 480 },
+          "category": { "type": "string", "enum": ["study", "practice", "review", "mock-exam"], "description": "Type of study activity" }
+        },
+        "required": ["date", "title", "durationMinutes", "category"]
+      },
+      "UpdateTaskInput": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string" },
+          "title": { "type": "string" },
+          "description": { "type": "string", "nullable": true },
+          "durationMinutes": { "type": "integer", "minimum": 5, "maximum": 480 },
+          "category": { "type": "string", "enum": ["study", "practice", "review", "mock-exam"] },
+          "completed": { "type": "boolean" }
+        },
+        "required": ["id"]
+      },
+      "DailyCompletion": {
+        "type": "object",
+        "properties": {
+          "date": { "type": "string", "format": "date" },
+          "habitCompletions": { "type": "object", "additionalProperties": { "type": "integer" } },
+          "taskCompletions": { "type": "array", "items": { "type": "string" } },
+          "notes": { "type": "string", "nullable": true },
+          "completedAt": { "type": "string", "format": "date-time" },
+          "mood": { "type": "integer", "minimum": 1, "maximum": 5, "nullable": true }
+        },
+        "required": ["date", "habitCompletions", "taskCompletions", "completedAt"]
+      },
+      "CreateCompletionInput": {
+        "type": "object",
+        "properties": {
+          "date": { "type": "string", "format": "date", "description": "YYYY-MM-DD" },
+          "habitCompletions": { "type": "object", "additionalProperties": { "type": "integer", "minimum": 0 }, "description": "habitId -> count completed" },
+          "taskCompletions": { "type": "array", "items": { "type": "string" }, "description": "Array of completed task IDs" },
+          "notes": { "type": "string", "nullable": true, "description": "End-of-day reflection notes" },
+          "mood": { "type": "integer", "minimum": 1, "maximum": 5, "description": "Mood rating 1-5" }
+        },
+        "required": ["date", "habitCompletions", "taskCompletions"]
+      },
+      "StatsResponse": {
+        "type": "object",
+        "properties": {
+          "period": {
+            "type": "object",
+            "properties": {
+              "days": { "type": "integer" },
+              "startDate": { "type": "string", "format": "date" },
+              "endDate": { "type": "string", "format": "date" }
+            }
+          },
+          "habits": {
+            "type": "object",
+            "properties": {
+              "total": { "type": "integer" },
+              "completedDays": { "type": "integer" },
+              "completionRate": { "type": "integer" }
+            }
+          },
+          "tasks": {
+            "type": "object",
+            "properties": {
+              "total": { "type": "integer" },
+              "completed": { "type": "integer" },
+              "completionRate": { "type": "integer" },
+              "studyHours": { "type": "number" }
+            }
+          },
+          "streak": {
+            "type": "object",
+            "properties": {
+              "current": { "type": "integer" }
+            }
+          }
+        }
+      }
+    }
+  },
+  "security": [{ "UserIdHeader": [] }],
+  "paths": {
+    "/habits": {
+      "get": {
+        "operationId": "listHabits",
+        "summary": "List all habits",
+        "description": "Returns all habits for the user, ordered by priority",
+        "responses": {
+          "200": {
+            "description": "List of habits",
+            "content": { "application/json": { "schema": { "type": "array", "items": { "$ref": "#/components/schemas/Habit" } } } }
+          }
+        }
+      },
+      "post": {
+        "operationId": "createHabit",
+        "summary": "Create a new habit",
+        "description": "Add a new daily habit to track",
+        "requestBody": {
+          "required": true,
+          "content": { "application/json": { "schema": { "$ref": "#/components/schemas/CreateHabitInput" } } }
+        },
+        "responses": {
+          "201": { "description": "Created habit", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Habit" } } } }
+        }
+      }
+    },
+    "/habits/{id}": {
+      "put": {
+        "operationId": "updateHabit",
+        "summary": "Update a habit",
+        "description": "Modify habit properties (name, target, unit, etc.)",
+        "parameters": [{ "name": "id", "in": "path", "required": true, "schema": { "type": "string" } }],
+        "requestBody": {
+          "required": true,
+          "content": { "application/json": { "schema": { "$ref": "#/components/schemas/UpdateHabitInput" } } }
+        },
+        "responses": {
+          "200": { "description": "Updated habit", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Habit" } } } }
+        }
+      },
+      "delete": {
+        "operationId": "deleteHabit",
+        "summary": "Delete a habit",
+        "description": "Permanently remove a habit",
+        "parameters": [{ "name": "id", "in": "path", "required": true, "schema": { "type": "string" } }],
+        "responses": { "204": { "description": "Deleted" } }
+      }
+    },
+    "/tasks": {
+      "get": {
+        "operationId": "listTasks",
+        "summary": "List study tasks",
+        "description": "Get tasks for a specific date or date range",
+        "parameters": [
+          { "name": "date", "in": "query", "schema": { "type": "string", "format": "date" }, "description": "Single date (YYYY-MM-DD)" },
+          { "name": "startDate", "in": "query", "schema": { "type": "string", "format": "date" }, "description": "Range start (YYYY-MM-DD)" },
+          { "name": "endDate", "in": "query", "schema": { "type": "string", "format": "date" }, "description": "Range end (YYYY-MM-DD)" }
+        ],
+        "responses": {
+          "200": { "description": "List of tasks", "content": { "application/json": { "schema": { "type": "array", "items": { "$ref": "#/components/schemas/StudyTask" } } } } }
+        }
+      },
+      "post": {
+        "operationId": "createTask",
+        "summary": "Create a study task",
+        "description": "Schedule a new study session",
+        "requestBody": {
+          "required": true,
+          "content": { "application/json": { "schema": { "$ref": "#/components/schemas/CreateTaskInput" } } }
+        },
+        "responses": {
+          "201": { "description": "Created task", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/StudyTask" } } } }
+        }
+      }
+    },
+    "/tasks/{id}": {
+      "put": {
+        "operationId": "updateTask",
+        "summary": "Update a task",
+        "description": "Modify task or mark complete/incomplete",
+        "parameters": [{ "name": "id", "in": "path", "required": true, "schema": { "type": "string" } }],
+        "requestBody": {
+          "required": true,
+          "content": { "application/json": { "schema": { "$ref": "#/components/schemas/UpdateTaskInput" } } }
+        },
+        "responses": {
+          "200": { "description": "Updated task", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/StudyTask" } } } }
+        }
+      },
+      "delete": {
+        "operationId": "deleteTask",
+        "summary": "Delete a task",
+        "parameters": [{ "name": "id", "in": "path", "required": true, "schema": { "type": "string" } }],
+        "responses": { "204": { "description": "Deleted" } }
+      }
+    },
+    "/completions": {
+      "get": {
+        "operationId": "listCompletions",
+        "summary": "List daily completions",
+        "parameters": [
+          { "name": "date", "in": "query", "schema": { "type": "string", "format": "date" }, "description": "Specific date (YYYY-MM-DD)" }
+        ],
+        "responses": {
+          "200": { "description": "List of completions", "content": { "application/json": { "schema": { "type": "array", "items": { "$ref": "#/components/schemas/DailyCompletion" } } } } }
+        }
+      },
+      "post": {
+        "operationId": "createCompletion",
+        "summary": "Save end-of-day completion",
+        "description": "Record habit counts, completed tasks, notes, and mood for a day",
+        "requestBody": {
+          "required": true,
+          "content": { "application/json": { "schema": { "$ref": "#/components/schemas/CreateCompletionInput" } } }
+        },
+        "responses": {
+          "201": { "description": "Saved completion", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/DailyCompletion" } } } }
+        }
+      }
+    },
+    "/stats": {
+      "get": {
+        "operationId": "getStats",
+        "summary": "Get progress statistics",
+        "description": "Overview of habit/task completion rates, study hours, and streak",
+        "parameters": [
+          { "name": "days", "in": "query", "schema": { "type": "integer", "default": 30 }, "description": "Period in days" }
+        ],
+        "responses": {
+          "200": { "description": "Statistics summary", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/StatsResponse" } } } }
+        }
+      }
+    }
+  }
+}

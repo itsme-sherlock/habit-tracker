@@ -12,11 +12,13 @@
     }
   },
   "rewrites": [
-    {
-      "source": "/(.*)",
-      "destination": {
-        "service": "app"
-      }
+    { "source": "/api/(.*)", "destination": "/api/$1" },
+    { "source": "/openapi.json", "destination": "/api/openapi.json" },
+    { "source": "/(.*)", "destination": { "service": "app" } }
+  ],
+  "functions": {
+    "api/*.ts": {
+      "maxDuration": 30
     }
-  ]
+  }
 }
