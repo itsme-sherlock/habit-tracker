@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { CheckCircle, Circle, Target, Flame, Calendar, ChevronLeft, ChevronRight, Sun, Moon, Settings, Bell, Mail, Download, Upload, RefreshCw } from 'lucide-react';
+import { CheckCircle, Circle, Target, Flame, Calendar, ChevronLeft, ChevronRight, Sun, Moon, Settings, Bell, Mail, Download, Upload, RefreshCw, Monitor } from 'lucide-react';
 import { format, parseISO, addDays, isToday, isSameDay, startOfWeek, endOfWeek } from 'date-fns';
 import type { Habit, StudyTask, DailyCompletion, AppSettings } from '../types';
 import { HabitList } from './HabitList';
@@ -11,6 +11,7 @@ import { useHabits } from '../hooks/useHabits';
 import { useSchedule } from '../hooks/useSchedule';
 import { useNotifications } from '../hooks/useNotifications';
 import { usePWA } from '../hooks/usePWA';
+import { useTheme } from '../context/ThemeContext';
 
 type View = 'today' | 'schedule' | 'settings';
 
@@ -32,6 +33,7 @@ export function Dashboard() {
   const { tasks, loading: tasksLoading, createTask, editTask, removeTask, toggleTaskComplete, getTasksForDate, loadTasksForDate, loadTasksForRange } = useSchedule();
   const { settings: notificationSettings, updateSettings, triggerTest } = useNotifications();
   const { installable, installed, install, updateAvailable, applyUpdate, offline } = usePWA();
+  const { theme, setTheme, resolvedTheme } = useTheme();
 
   const todayTasks = getTasksForDate(selectedDate);
   const todayCompletion = completion;
@@ -207,6 +209,22 @@ export function Dashboard() {
             </button>
           </div>
           <div className="flex items-center gap-2">
+            {/* Theme Toggle */}
+            <button
+              onClick={() => {
+                const themes: Array<'light' | 'dark' | 'system'> = ['light', 'dark', 'system'];
+                const currentIndex = themes.indexOf(theme);
+                const nextIndex = (currentIndex + 1) % themes.length;
+                setTheme(themes[nextIndex]);
+              }}
+              className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800"
+              title={`Current: ${theme} (click to cycle)`}
+              aria-label="Toggle theme"
+            >
+              {theme === 'light' && <Sun className="w-5 h-5 text-yellow-500" />}
+              {theme === 'dark' && <Moon className="w-5 h-5 text-blue-400" />}
+              {theme === 'system' && <Monitor className="w-5 h-5 text-gray-500 dark:text-gray-400" />}
+            </button>
             {updateAvailable && (
               <button onClick={applyUpdate} className="btn-secondary text-sm">
                 <RefreshCw className="w-4 h-4 mr-1 animate-spin" /> Update
