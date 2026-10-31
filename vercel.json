@@ -3,7 +3,12 @@
   "services": {
     "app": {
       "root": ".",
-      "framework": "vite"
+      "framework": "vite",
+      "functions": {
+        "api/*.ts": {
+          "maxDuration": 30
+        }
+      }
     },
     "mcp-server": {
       "root": "mcp-server",
@@ -15,10 +20,5 @@
     { "source": "/api/(.*)", "destination": "/api/$1" },
     { "source": "/openapi.json", "destination": "/api/openapi.json" },
     { "source": "/(.*)", "destination": { "service": "app" } }
-  ],
-  "functions": {
-    "api/*.ts": {
-      "maxDuration": 30
-    }
-  }
+  ]
 }
