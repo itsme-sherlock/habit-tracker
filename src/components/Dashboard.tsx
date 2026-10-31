@@ -1,19 +1,25 @@
-import { useState, useEffect } from 'react';
-import { CheckCircle, Circle, Target, Flame, Calendar, ChevronLeft, ChevronRight, Sun, Moon, Settings, Bell, Mail, Download, Upload, RefreshCw, Monitor } from 'lucide-react';
+import { useState, useEffect, useRef, useCallback } from 'react';
+import { CheckCircle, Target, Calendar, ChevronLeft, ChevronRight, Sun, Moon, Settings, Download, RefreshCw, Monitor, Star, Plus } from 'lucide-react';
 import { format, parseISO, addDays, isToday, isSameDay, startOfWeek, endOfWeek } from 'date-fns';
 import type { Habit, StudyTask, DailyCompletion, AppSettings } from '../types';
 import { HabitList } from './HabitList';
 import { ScheduleEditor } from './ScheduleEditor';
 import { SettingsComponent } from './Settings';
-import { getNotificationIcon, getCategoryColor, formatDuration } from '../utils/notifications';
+import { TaskCard } from './TaskCard';
+import { TodayHero } from './TodayHero';
 import { getCompletionForDate, saveDailyCompletion, getHabits, getTasksForDate, getSettings, saveSettings } from '../services/db';
 import { useHabits } from '../hooks/useHabits';
 import { useSchedule } from '../hooks/useSchedule';
 import { useNotifications } from '../hooks/useNotifications';
 import { usePWA } from '../hooks/usePWA';
+import { useSupabaseSync } from '../hooks/useSupabaseSync';
 import { useTheme } from '../context/ThemeContext';
 
 type View = 'today' | 'schedule' | 'settings';
+
+function currentTimestamp(): number {
+  return Date.now();
+}
 
 export function Dashboard() {
   const [view, setView] = useState<View>('today');
@@ -23,6 +29,9 @@ export function Dashboard() {
   const [endDayMood, setEndDayMood] = useState<1|2|3|4|5>(3);
   const [completion, setCompletion] = useState<DailyCompletion | null>(null);
   const [appSettings, setAppSettings] = useState<AppSettings | null>(null);
+  const [habitSaveError, setHabitSaveError] = useState<string | null>(null);
+  const completionRef = useRef<DailyCompletion | null>(null);
+  const completionLoadIdRef = useRef(0);
 
   // Load app settings
   useEffect(() => {
@@ -33,20 +42,33 @@ export function Dashboard() {
   const { tasks, loading: tasksLoading, createTask, editTask, removeTask, toggleTaskComplete, getTasksForDate, loadTasksForDate, loadTasksForRange } = useSchedule();
   const { settings: notificationSettings, updateSettings, triggerTest } = useNotifications();
   const { installable, installed, install, updateAvailable, applyUpdate, offline } = usePWA();
+  const cloudSync = useSupabaseSync();
+  const signedInUserId = cloudSync.user?.id;
   const { theme, setTheme, resolvedTheme } = useTheme();
 
   const todayTasks = getTasksForDate(selectedDate);
-  const todayCompletion = completion;
+  const todayCompletion = completion?.date === selectedDate ? completion : null;
 
   // Load completion for selected date
-  useEffect(() => {
-    loadCompletion();
+  const loadCompletion = useCallback(async () => {
+    const requestId = ++completionLoadIdRef.current;
+    const date = selectedDate;
+    const c = await getCompletionForDate(date);
+    if (requestId !== completionLoadIdRef.current) return;
+    completionRef.current = c || null;
+    setCompletion(c);
   }, [selectedDate]);
 
-  const loadCompletion = async () => {
-    const c = await getCompletionForDate(selectedDate);
-    setCompletion(c);
-  };
+  useEffect(() => {
+    void loadCompletion();
+  }, [loadCompletion]);
+
+  useEffect(() => {
+    if (!signedInUserId || !cloudSync.syncStatus.lastSyncTime) return;
+    void refreshHabits();
+    void loadTasksForRange('0000-01-01', '9999-12-31');
+    void loadCompletion();
+  }, [signedInUserId, cloudSync.syncStatus.lastSyncTime, refreshHabits, loadTasksForRange, loadCompletion]);
 
   const habitCompletions = todayCompletion?.habitCompletions || {};
   const taskCompletions = todayCompletion?.taskCompletions || [];
@@ -60,22 +82,34 @@ export function Dashboard() {
     ? Math.round(((completedHabits + completedTasks) / (totalHabits + totalTasks)) * 100)
     : 0;
 
-  const handleIncrementHabit = (id: string) => {
-    const current = habitCompletions[id] || 0;
+  const updateHabitCompletion = (id: string, change: 1 | -1) => {
+    const currentCompletion = completionRef.current?.date === selectedDate
+      ? completionRef.current
+      : null;
+    const current = currentCompletion?.habitCompletions[id] || 0;
     const habit = habits.find(h => h.id === id);
-    if (habit && current < habit.targetCount) {
-      const newCompletions = { ...habitCompletions, [id]: current + 1 };
-      setCompletion(prev => prev ? { ...prev, habitCompletions: newCompletions } : null);
-    }
+    if (!habit || (change > 0 && current >= habit.targetCount) || (change < 0 && current <= 0)) return;
+
+    const updated: DailyCompletion = {
+      date: selectedDate,
+      habitCompletions: { ...(currentCompletion?.habitCompletions || {}), [id]: current + change },
+      taskCompletions: currentCompletion?.taskCompletions || [],
+      completedAt: currentCompletion?.completedAt || currentTimestamp(),
+      dayEnded: currentCompletion?.dayEnded ?? Boolean(currentCompletion),
+      notes: currentCompletion?.notes,
+      mood: currentCompletion?.mood,
+    };
+    completionRef.current = updated;
+    setCompletion(updated);
+    setHabitSaveError(null);
+    saveDailyCompletion(updated).catch(error => {
+      console.error('Failed to save habit progress:', error);
+      setHabitSaveError('Could not save habit progress. Please try again.');
+    });
   };
 
-  const handleDecrementHabit = (id: string) => {
-    const current = habitCompletions[id] || 0;
-    if (current > 0) {
-      const newCompletions = { ...habitCompletions, [id]: current - 1 };
-      setCompletion(prev => prev ? { ...prev, habitCompletions: newCompletions } : null);
-    }
-  };
+  const handleIncrementHabit = (id: string) => updateHabitCompletion(id, 1);
+  const handleDecrementHabit = (id: string) => updateHabitCompletion(id, -1);
 
   const handleToggleTask = async (id: string) => {
     await toggleTaskComplete(id, !todayTasks.find(t => t.id === id)?.completed);
@@ -88,10 +122,12 @@ export function Dashboard() {
       habitCompletions,
       taskCompletions: todayTasks.filter(t => t.completed || taskCompletions.includes(t.id)).map(t => t.id),
       notes: endDayNotes,
-      completedAt: Date.now(),
+      completedAt: currentTimestamp(),
       mood: endDayMood,
+      dayEnded: true,
     };
     await saveDailyCompletion(newCompletion);
+    completionRef.current = newCompletion;
     setCompletion(newCompletion);
     setShowEndDayModal(false);
     setEndDayNotes('');
@@ -171,6 +207,7 @@ export function Dashboard() {
         <SettingsComponent
           settings={appSettings || { theme: 'system', notificationSettings: { pushEnabled: true, emailEnabled: true, pushTime: '08:00', emailTime: '08:00', emailAddress: '', reminderTime: '20:00' } }}
           onSettingsChange={async (s) => { await saveSettings(s); setAppSettings(s); }}
+          account={cloudSync}
         />
       </div>
     );
@@ -178,22 +215,28 @@ export function Dashboard() {
 
   // Today view
   const isTodaySelected = isToday(parseISO(selectedDate));
-  const canEndDay = isTodaySelected && !todayCompletion;
+  const dayEnded = todayCompletion?.dayEnded ?? Boolean(todayCompletion);
+  const canEndDay = isTodaySelected && !dayEnded;
 
   return (
-    <div className="min-h-screen pb-20">
+    <div className="dashboard-page min-h-screen pb-20">
       {/* Header */}
-      <header className="sticky top-0 z-40 bg-white/80 dark:bg-gray-950/80 backdrop-blur-sm border-b border-gray-200 dark:border-gray-800">
-        <div className="max-w-2xl mx-auto px-4 py-3 flex items-center justify-between">
-          <div className="flex items-center gap-3">
+      <header className="dashboard-header sticky top-0 z-40 backdrop-blur-sm border-b">
+        <div className="dashboard-header-inner max-w-2xl mx-auto px-4 py-3 flex items-center justify-between">
+          <div className="dashboard-brand">
+            <span className="dashboard-brand-symbol" aria-hidden="true">d</span>
+            <span>Daymark</span>
+          </div>
+          <div className="dashboard-date-controls flex items-center gap-3">
             <button
               onClick={() => setSelectedDate(format(addDays(parseISO(selectedDate), -1), 'yyyy-MM-dd'))}
-              className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800"
+              className="icon-button"
+              aria-label="Previous day"
             >
               <ChevronLeft className="w-5 h-5" />
             </button>
-            <div className="text-center">
-              <div className="text-sm text-gray-500 dark:text-gray-400">
+            <div className="dashboard-date-copy">
+              <div className="text-sm text-muted">
                 {format(parseISO(selectedDate), 'EEEE, MMM d')}
               </div>
               <div className="text-xl font-bold text-gray-900 dark:text-gray-100">
@@ -202,8 +245,8 @@ export function Dashboard() {
             </div>
             <button
               onClick={() => setSelectedDate(format(addDays(parseISO(selectedDate), 1), 'yyyy-MM-dd'))}
-              disabled={isTodaySelected}
-              className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 disabled:opacity-50"
+              className="icon-button"
+              aria-label="Next day"
             >
               <ChevronRight className="w-5 h-5" />
             </button>
@@ -217,9 +260,9 @@ export function Dashboard() {
                 const nextIndex = (currentIndex + 1) % themes.length;
                 setTheme(themes[nextIndex]);
               }}
-              className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800"
+              className="icon-button"
               title={`Current: ${theme} (click to cycle)`}
-              aria-label="Toggle theme"
+              aria-label={`Theme: ${theme}. Activate to change`}
             >
               {theme === 'light' && <Sun className="w-5 h-5 text-yellow-500" />}
               {theme === 'dark' && <Moon className="w-5 h-5 text-blue-400" />}
@@ -240,74 +283,35 @@ export function Dashboard() {
       </header>
 
       {/* Progress Ring */}
-      <div className="max-w-2xl mx-auto px-4 py-4">
-        <div className="flex items-center justify-center">
-          <div className="relative w-32 h-32">
-            <svg className="w-full h-full transform -rotate-90">
-              <circle
-                cx="64"
-                cy="64"
-                r="56"
-                fill="none"
-                stroke="#e5e7eb"
-                strokeWidth="8"
-                className="dark:stroke-gray-700"
-              />
-              <circle
-                cx="64"
-                cy="64"
-                r="56"
-                fill="none"
-                stroke="#0ea5e9"
-                strokeWidth="8"
-                strokeDasharray={`${(overallProgress / 100) * 351.86} 351.86`}
-                strokeLinecap="round"
-                className="progress-ring-circle transition-all duration-500"
-              />
-            </svg>
-            <div className="absolute inset-0 flex flex-col items-center justify-center">
-              <span className="text-3xl font-bold text-gray-900 dark:text-gray-100">{overallProgress}%</span>
-              <span className="text-xs text-gray-500 dark:text-gray-400">Complete</span>
-            </div>
-          </div>
-        </div>
-
-        {/* Stats */}
-        <div className="grid grid-cols-4 gap-3 mt-4">
-          <div className="card p-3 text-center">
-            <div className="text-2xl font-bold text-primary-500">{completedHabits}/{totalHabits}</div>
-            <div className="text-xs text-gray-500">Habits</div>
-          </div>
-          <div className="card p-3 text-center">
-            <div className="text-2xl font-bold text-green-500">{completedTasks}/{totalTasks}</div>
-            <div className="text-xs text-gray-500">Tasks</div>
-          </div>
-          <div className="card p-3 text-center">
-            <div className="text-2xl font-bold text-purple-500">
-              {todayTasks.reduce((sum, t) => sum + (t.completed || taskCompletions.includes(t.id) ? t.durationMinutes : 0), 0) / 60}h
-            </div>
-            <div className="text-xs text-gray-500">Studied</div>
-          </div>
-          <div className="card p-3 text-center">
-            <div className="text-2xl font-bold text-orange-500">
-              {todayTasks.reduce((sum, t) => sum + t.durationMinutes, 0) / 60}h
-            </div>
-            <div className="text-xs text-gray-500">Planned</div>
-          </div>
-        </div>
+      <div className="dashboard-overview-wrap">
+        <TodayHero
+          selectedDate={selectedDate}
+          overallProgress={overallProgress}
+          completedHabits={completedHabits}
+          totalHabits={totalHabits}
+          completedTasks={completedTasks}
+          totalTasks={totalTasks}
+          studiedMinutes={todayTasks.reduce((sum, t) => sum + (t.completed || taskCompletions.includes(t.id) ? t.durationMinutes : 0), 0)}
+          plannedMinutes={todayTasks.reduce((sum, t) => sum + t.durationMinutes, 0)}
+        />
       </div>
 
       {/* Habits Section */}
-      <div className="max-w-2xl mx-auto px-4 pb-4">
-        <div className="flex items-center justify-between mb-3">
-          <h2 className="font-semibold text-gray-900 dark:text-gray-100 flex items-center gap-2">
-            <Target className="w-5 h-5 text-primary-500" />
+      <div className="dashboard-habits-wrap">
+        <div className="dashboard-section-heading flex items-center justify-between mb-3">
+          <h2 className="font-semibold text-strong flex items-center gap-2">
+            <Target className="w-5 h-5 text-accent" aria-hidden="true" />
             Daily Habits
           </h2>
-          <button onClick={handleAddHabit} className="btn-secondary text-sm">
-            <span className="text-lg">+</span>
+          <button onClick={handleAddHabit} className="icon-button" aria-label="Add habit">
+            <Plus className="w-5 h-5" aria-hidden="true" />
           </button>
         </div>
+        {habitSaveError && (
+          <p role="alert" className="mb-3 text-sm text-red-600 dark:text-red-400">
+            {habitSaveError}
+          </p>
+        )}
         <HabitList
           habits={habits}
           completions={habitCompletions}
@@ -321,10 +325,10 @@ export function Dashboard() {
       </div>
 
       {/* Today's Study Tasks */}
-      <div className="max-w-2xl mx-auto px-4 pb-4">
-        <div className="flex items-center justify-between mb-3">
-          <h2 className="font-semibold text-gray-900 dark:text-gray-100 flex items-center gap-2">
-            <Calendar className="w-5 h-5 text-primary-500" />
+      <div className="dashboard-plan-wrap">
+        <div className="dashboard-section-heading flex items-center justify-between mb-3">
+          <h2 className="font-semibold text-strong flex items-center gap-2">
+            <Calendar className="w-5 h-5 text-accent" aria-hidden="true" />
             Today's Study Plan
           </h2>
           <button
@@ -346,40 +350,21 @@ export function Dashboard() {
           </div>
         ) : (
           <div className="space-y-3">
-            {todayTasks.map(task => {
-              const isComplete = task.completed || taskCompletions.includes(task.id);
-              return (
-                <div key={task.id} className="card p-4 flex items-start gap-4">
-                  <button
-                    onClick={() => handleToggleTask(task.id)}
-                    className={`relative w-6 h-6 flex-shrink-0 mt-0.5 rounded border-2 transition-colors ${
-                      isComplete ? 'border-green-500 bg-green-500' : 'border-gray-300 dark:border-gray-600'
-                    }`}
-                  >
-                    {isComplete && <CheckCircle className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-4 h-4 text-white" />}
-                  </button>
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2 flex-wrap">
-                      <h3 className={`font-medium truncate ${isComplete ? 'line-through text-gray-400' : 'text-gray-900 dark:text-gray-100'}`}>
-                        {task.title}
-                      </h3>
-                      <span className={getCategoryColor(task.category)}>
-                        {getNotificationIcon(task.category)} {task.category}
-                      </span>
-                      <span className="text-sm text-gray-500 dark:text-gray-400">{formatDuration(task.durationMinutes)}</span>
-                    </div>
-                    {task.description && <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">{task.description}</p>}
-                  </div>
-                </div>
-              );
-            })}
+            {todayTasks.map(task => (
+              <TaskCard
+                key={task.id}
+                task={task}
+                isComplete={task.completed || taskCompletions.includes(task.id)}
+                onToggle={() => handleToggleTask(task.id)}
+              />
+            ))}
           </div>
         )}
       </div>
 
       {/* End Day Button */}
       {canEndDay && (
-        <div className="max-w-2xl mx-auto px-4 pb-4">
+        <div className="dashboard-endday-wrap">
           <button
             onClick={() => setShowEndDayModal(true)}
             className="btn-primary w-full py-4 text-lg"
@@ -390,15 +375,15 @@ export function Dashboard() {
         </div>
       )}
 
-      {todayCompletion && !canEndDay && (
-        <div className="max-w-2xl mx-auto px-4 pb-4">
+      {todayCompletion && dayEnded && (
+        <div className="dashboard-completed-wrap">
           <div className="card p-4 bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-800">
             <div className="flex items-center gap-2 text-green-700 dark:text-green-300 mb-2">
               <CheckCircle className="w-5 h-5" />
               <span className="font-semibold">Day Completed!</span>
             </div>
             <p className="text-sm text-green-600 dark:text-green-400">
-              Completed at {format(new Date(todayCompletion.completedAt), 'HH:mm')} • {todayCompletion.mood ? '⭐'.repeat(todayCompletion.mood) : ''}
+              Completed at {format(new Date(todayCompletion.completedAt), 'HH:mm')}{todayCompletion.mood ? ` • ${todayCompletion.mood}/5 mood` : ''}
             </p>
             {todayCompletion.notes && (
               <p className="mt-2 text-sm text-gray-700 dark:text-gray-300 italic">"{todayCompletion.notes}"</p>
@@ -408,41 +393,23 @@ export function Dashboard() {
       )}
 
       {/* Bottom Navigation */}
-      <nav className="fixed bottom-0 left-0 right-0 bg-white/95 dark:bg-gray-950/95 backdrop-blur-sm border-t border-gray-200 dark:border-gray-800 safe-area-inset-bottom">
+      <nav aria-label="Primary" className="fixed bottom-0 left-0 right-0 backdrop-blur-sm border-t safe-area-inset-bottom" style={{ background: 'color-mix(in srgb, var(--surface) 94%, transparent)', borderColor: 'var(--border)' }}>
         <div className="grid grid-cols-3 max-w-2xl mx-auto">
-          <button
-            onClick={() => setView('today')}
-            className={`py-3 flex flex-col items-center gap-1 transition-colors ${
-              view === 'today'
-                ? 'text-primary-500'
-                : 'text-gray-500 hover:text-gray-700 dark:hover:text-gray-300'
-            }`}
-          >
-            <Sun className="w-6 h-6" />
-            <span className="text-xs">Today</span>
-          </button>
-          <button
-            onClick={() => setView('schedule')}
-            className={`py-3 flex flex-col items-center gap-1 transition-colors ${
-              view === 'schedule'
-                ? 'text-primary-500'
-                : 'text-gray-500 hover:text-gray-700 dark:hover:text-gray-300'
-            }`}
-          >
-            <Calendar className="w-6 h-6" />
-            <span className="text-xs">Schedule</span>
-          </button>
-          <button
-            onClick={() => setView('settings')}
-            className={`py-3 flex flex-col items-center gap-1 transition-colors ${
-              view === 'settings'
-                ? 'text-primary-500'
-                : 'text-gray-500 hover:text-gray-700 dark:hover:text-gray-300'
-            }`}
-          >
-            <Settings className="w-6 h-6" />
-            <span className="text-xs">Settings</span>
-          </button>
+          {([
+            ['today', 'Today', Sun],
+            ['schedule', 'Schedule', Calendar],
+            ['settings', 'Settings', Settings],
+          ] as const).map(([key, label, NavIcon]) => (
+            <button
+              key={key}
+              onClick={() => setView(key)}
+              aria-current={view === key ? 'page' : undefined}
+              className={`min-h-[56px] py-2 flex flex-col items-center justify-center gap-1 transition-colors ${view === key ? 'text-accent font-semibold' : 'text-muted'}`}
+            >
+              <NavIcon className="w-6 h-6" aria-hidden="true" />
+              <span className="text-xs">{label}</span>
+            </button>
+          ))}
         </div>
       </nav>
 
@@ -465,7 +432,12 @@ export function Dashboard() {
                           : 'border-gray-200 dark:border-gray-700 hover:border-gray-300'
                       }`}
                     >
-                      {'⭐'.repeat(m)}
+                              <span className="sr-only">{m} star{m > 1 ? 's' : ''}</span>
+                      <span aria-hidden="true" className="inline-flex justify-center">
+                        {Array.from({ length: m }, (_, i) => (
+                          <Star key={i} className="w-4 h-4 fill-amber-400 text-amber-400" />
+                        ))}
+                      </span>
                     </button>
                   ))}
                 </div>

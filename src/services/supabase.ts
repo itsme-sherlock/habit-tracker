@@ -37,11 +37,16 @@ export interface SupabaseDailyCompletion {
   notes: string | null;
   completed_at: string;
   mood: number | null;
+  day_ended: boolean;
   user_id: string;
 }
 
 // Supabase client singleton
 let supabaseClient: SupabaseClient | null = null;
+
+export function isSupabaseConfigured(): boolean {
+  return Boolean(import.meta.env.VITE_SUPABASE_URL && import.meta.env.VITE_SUPABASE_ANON_KEY);
+}
 
 export function getSupabaseClient(): SupabaseClient {
   if (!supabaseClient) {
@@ -54,8 +59,9 @@ export function getSupabaseClient(): SupabaseClient {
 
     supabaseClient = createClient(url, key, {
       auth: {
-        persistSession: false, // We'll handle auth differently for PWA
-        autoRefreshToken: false,
+        persistSession: true,
+        autoRefreshToken: true,
+        detectSessionInUrl: true,
       },
     });
   }
@@ -75,9 +81,8 @@ export function toPWAHabit(s: SupabaseHabit): Habit {
     frequency: s.frequency as Habit['frequency'],
     targetCount: s.target_count,
     unit: s.unit as Habit['unit'],
-    createdAt: s.created_at,
+    createdAt: Date.parse(s.created_at),
     order: s.order,
-    updatedAt: s.updated_at ?? undefined,
   };
 }
 
@@ -90,20 +95,20 @@ export function toPWATask(s: SupabaseStudyTask): StudyTask {
     durationMinutes: s.duration_minutes,
     category: s.category,
     completed: s.completed,
-    completedAt: s.completed_at ?? undefined,
-    createdAt: s.created_at,
-    updatedAt: s.updated_at ?? undefined,
+    completedAt: s.completed_at ? Date.parse(s.completed_at) : undefined,
   };
 }
 
 export function toPWACompletion(s: SupabaseDailyCompletion): DailyCompletion {
+  const mood = s.mood;
   return {
     date: s.date,
     habitCompletions: s.habit_completions,
     taskCompletions: s.task_completions,
     notes: s.notes ?? undefined,
-    mood: s.mood ?? undefined,
-    completedAt: s.completed_at,
+    mood: mood === 1 || mood === 2 || mood === 3 || mood === 4 || mood === 5 ? mood : undefined,
+    completedAt: Date.parse(s.completed_at),
+    dayEnded: s.day_ended,
   };
 }
 
@@ -128,19 +133,21 @@ export function toSupabaseTask(t: StudyTask, userId: string): Omit<SupabaseStudy
     duration_minutes: t.durationMinutes,
     category: t.category,
     completed: t.completed,
-    completed_at: t.completedAt ?? null,
+    completed_at: t.completedAt ? new Date(t.completedAt).toISOString() : null,
     user_id: userId,
   };
 }
 
-export function toSupabaseCompletion(c: DailyCompletion, userId: string): Omit<SupabaseDailyCompletion, 'user_id'> {
+export function toSupabaseCompletion(c: DailyCompletion, userId: string): SupabaseDailyCompletion {
   return {
     date: c.date,
     habit_completions: c.habitCompletions,
     task_completions: c.taskCompletions,
     notes: c.notes ?? null,
-    completed_at: c.completedAt,
+    completed_at: new Date(c.completedAt).toISOString(),
     mood: c.mood ?? null,
+    day_ended: c.dayEnded ?? true,
+    user_id: userId,
   };
 }
 

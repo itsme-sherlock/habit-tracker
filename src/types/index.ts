@@ -27,6 +27,7 @@ export interface DailyCompletion {
   notes?: string;
   completedAt: number;
   mood?: 1 | 2 | 3 | 4 | 5;
+  dayEnded?: boolean;
 }
 
 export interface NotificationSettings {
@@ -42,6 +43,7 @@ export interface AppSettings {
   theme: 'light' | 'dark' | 'system';
   notificationSettings: NotificationSettings;
   initialized?: boolean;
+  planVersion?: number;
 }
 
 export const DEFAULT_NOTIFICATION_SETTINGS: NotificationSettings = {

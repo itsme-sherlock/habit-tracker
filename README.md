@@ -1,32 +1,47 @@
-# React + TypeScript + Vite
+# Habit Tracker
 
-This template provides a minimal setup to get React working in Vite with HMR and some Oxlint rules.
+Habit Tracker is a React/Vite app packaged for Android with Capacitor.
 
-Currently, two official plugins are available:
+## Build an Android APK
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+Install Node.js and Android Studio, including Android SDK 36. Android builds also
+require JDK 17 or newer. From the project root, run:
 
-## React Compiler
-
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
-
-## Expanding the Oxlint configuration
-
-If you are developing a production application, we recommend enabling type-aware lint rules by installing `oxlint-tsgolint` and editing `.oxlintrc.json`:
-
-```json
-{
-  "$schema": "./node_modules/oxlint/configuration_schema.json",
-  "plugins": ["react", "typescript", "oxc"],
-  "options": {
-    "typeAware": true
-  },
-  "rules": {
-    "react/rules-of-hooks": "error",
-    "react/only-export-components": ["warn", { "allowConstantExport": true }]
-  }
-}
+```powershell
+npm install
+npm run android:apk
 ```
 
-See the [Oxlint rules documentation](https://oxc.rs/docs/guide/usage/linter/rules) for the full list of rules and categories.
+The debug APK is written to
+`android/app/build/outputs/apk/debug/app-debug.apk`. Copy it to an Android
+device and open it to install. If Android asks, allow installs from that source.
+
+## Prepare a Google Play bundle
+
+Google Play accepts Android App Bundles (`.aab`). Create and securely keep an
+upload keystore outside the repository. For example, with the JDK's `keytool`:
+
+```powershell
+keytool -genkeypair -v -keystore "$HOME\habit-tracker-upload-key.jks" `
+  -keyalg RSA -keysize 2048 -validity 10000 -alias upload
+```
+
+Set these environment variables in the same PowerShell session before building:
+
+```powershell
+$env:ANDROID_KEYSTORE_PATH = "$HOME\habit-tracker-upload-key.jks"
+$env:ANDROID_KEYSTORE_PASSWORD = "<keystore password>"
+$env:ANDROID_KEY_ALIAS = "upload"
+$env:ANDROID_KEY_PASSWORD = "<key password>"
+npm run android:bundle
+```
+
+The signed bundle is written to
+`android/app/build/outputs/bundle/release/app-release.aab`. Keep the keystore
+and passwords backed up securely; Google Play uses the signing identity to
+accept future app updates. Do not commit the keystore or its passwords.
+
+Before publishing, create a Google Play developer account and complete the Play
+Console listing and policy requirements. The Android application ID is
+`com.habittracker.app`; choose and set a unique application ID before the first
+Play upload if this one is unavailable, since it cannot be changed for updates.

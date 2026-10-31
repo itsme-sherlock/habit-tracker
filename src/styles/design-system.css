@@ -1,0 +1,399 @@
+/* ==========================================================================
+   HABIT TRACKER DESIGN SYSTEM — UI/UX Pro Max
+   Semantic tokens, accessible colors, consistent spacing, fluid typography
+   ========================================================================== */
+
+/* ===== COLOR TOKENS (Semantic, WCAG 2.1 AA compliant) ===== */
+:root {
+  /* Brand — Primary (Sky/Blue for study focus) */
+  --color-brand-50:  #f0f9ff;
+  --color-brand-100: #e0f2fe;
+  --color-brand-200: #bae6fd;
+  --color-brand-300: #7dd3fc;
+  --color-brand-400: #38bdf8;
+  --color-brand-500: #0ea5e9;  /* Primary — 4.5:1 on white */
+  --color-brand-600: #0284c7;
+  --color-brand-700: #0369a1;
+  --color-brand-800: #075985;
+  --color-brand-900: #0c4a6e;
+
+  /* Success — Green for completion */
+  --color-success-50:  #f0fdf4;
+  --color-success-100: #dcfce7;
+  --color-success-200: #bbf7d0;
+  --color-success-300: #86efac;
+  --color-success-400: #4ade80;
+  --color-success-500: #22c55e;
+  --color-success-600: #16a34a;
+  --color-success-700: #15803d;
+
+  /* Warning — Amber for in-progress */
+  --color-warning-50:  #fffbeb;
+  --color-warning-100: #fef3c7;
+  --color-warning-200: #fde68a;
+  --color-warning-300: #fcd34d;
+  --color-warning-400: #fbbf24;
+  --color-warning-500: #f59e0b;
+  --color-warning-600: #d97706;
+
+  /* Danger — Red for destructive */
+  --color-danger-50:  #fef2f2;
+  --color-danger-100: #fee2e2;
+  --color-danger-200: #fecaca;
+  --color-danger-300: #fca5a5;
+  --color-danger-400: #f87171;
+  --color-danger-500: #ef4444;
+  --color-danger-600: #dc2626;
+  --color-danger-700: #b91c1c;
+
+  /* Neutral — Gray scale */
+  --color-neutral-0:   #ffffff;
+  --color-neutral-50:  #fafafa;
+  --color-neutral-100: #f5f5f5;
+  --color-neutral-200: #e5e5e5;
+  --color-neutral-300: #d4d4d4;
+  --color-neutral-400: #a3a3a3;
+  --color-neutral-500: #737373;
+  --color-neutral-600: #525252;
+  --color-neutral-700: #404040;
+  --color-neutral-800: #262626;
+  --color-neutral-900: #171717;
+  --color-neutral-950: #0a0a0a;
+
+  /* Category colors (for study tasks) */
+  --color-study-500:    #0ea5e9;  /* Blue */
+  --color-practice-500: #22c55e;  /* Green */
+  --color-review-500:   #f59e0b;  /* Amber */
+  --color-mock-exam-500:#a855f7;  /* Purple */
+
+  /* Category light variants for badges */
+  --color-study-100:    #e0f2fe;
+  --color-study-200:    #bae6fd;
+  --color-practice-100: #dcfce7;
+  --color-practice-200: #bbf7d0;
+  --color-review-100:   #fef3c7;
+  --color-review-200:   #fde68a;
+  --color-mock-exam-100:#f3e8ff;
+  --color-mock-exam-200:#e9d5ff;
+}
+
+/* Dark mode — Semantic mapping (maintains 4.5:1 contrast) */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --color-bg-primary:      var(--color-neutral-950);
+    --color-bg-secondary:    var(--color-neutral-900);
+    --color-bg-tertiary:     var(--color-neutral-800);
+    --color-bg-hover:        var(--color-neutral-800);
+    --color-bg-active:       var(--color-neutral-700);
+
+    --color-text-primary:    var(--color-neutral-50);
+    --color-text-secondary:  var(--color-neutral-400);
+    --color-text-tertiary:   var(--color-neutral-500);
+    --color-text-inverse:    var(--color-neutral-950);
+
+    --color-border-subtle:   var(--color-neutral-800);
+    --color-border-default:  var(--color-neutral-700);
+    --color-border-emphasis: var(--color-neutral-600);
+
+    --color-brand-bg:        rgba(14, 165, 233, 0.15);
+    --color-brand-border:    rgba(14, 165, 233, 0.3);
+    --color-success-bg:      rgba(34, 197, 94, 0.15);
+    --color-warning-bg:      rgba(245, 158, 11, 0.15);
+    --color-danger-bg:       rgba(239, 68, 68, 0.15);
+
+    --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.3);
+    --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.4), 0 2px 4px -2px rgb(0 0 0 / 0.3);
+    --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.4), 0 4px 6px -2px rgb(0 0 0 / 0.2);
+  }
+}
+
+/* Light mode (default) */
+:root,
+[data-theme="light"] {
+  --color-bg-primary:      var(--color-neutral-0);
+  --color-bg-secondary:    var(--color-neutral-50);
+  --color-bg-tertiary:     var(--color-neutral-100);
+  --color-bg-hover:        var(--color-neutral-100);
+  --color-bg-active:       var(--color-neutral-200);
+
+  --color-text-primary:    var(--color-neutral-900);
+  --color-text-secondary:  var(--color-neutral-600);
+  --color-text-tertiary:   var(--color-neutral-500);
+  --color-text-inverse:    var(--color-neutral-0);
+
+  --color-border-subtle:   var(--color-neutral-200);
+  --color-border-default:  var(--color-neutral-300);
+  --color-border-emphasis: var(--color-neutral-400);
+
+  --color-brand-bg:        rgba(14, 165, 233, 0.1);
+  --color-brand-border:    rgba(14, 165, 233, 0.2);
+  --color-success-bg:      rgba(34, 197, 94, 0.1);
+  --color-warning-bg:      rgba(245, 158, 11, 0.1);
+  --color-danger-bg:       rgba(239, 68, 68, 0.1);
+
+  --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+  --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.05);
+  --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -2px rgb(0 0 0 / 0.05);
+}
+
+/* ===== TYPOGRAPHY TOKENS ===== */
+:root {
+  /* Font families */
+  --font-sans: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --font-mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+
+  /* Fluid type scale (clamp for responsive without breakpoints) */
+  --text-xs:     clamp(0.7rem, 0.68rem + 0.1vw, 0.75rem);    /* 11-12px */
+  --text-sm:     clamp(0.8125rem, 0.78rem + 0.16vw, 0.875rem); /* 13-14px */
+  --text-base:   clamp(0.9375rem, 0.9rem + 0.18vw, 1rem);      /* 15-16px */
+  --text-lg:     clamp(1.0625rem, 1.02rem + 0.2vw, 1.125rem);  /* 17-18px */
+  --text-xl:     clamp(1.25rem, 1.18rem + 0.35vw, 1.375rem);   /* 20-22px */
+  --text-2xl:    clamp(1.5rem, 1.4rem + 0.5vw, 1.75rem);       /* 24-28px */
+  --text-3xl:    clamp(1.875rem, 1.7rem + 0.87vw, 2.25rem);    /* 30-36px */
+  --text-4xl:    clamp(2.25rem, 2rem + 1.25vw, 3rem);          /* 36-48px */
+
+  /* Line heights */
+  --leading-tight:   1.25;
+  --leading-snug:    1.375;
+  --leading-normal:  1.5;
+  --leading-relaxed: 1.625;
+
+  /* Font weights */
+  --font-normal: 400;
+  --font-medium: 500;
+  --font-semibold: 600;
+  --font-bold: 700;
+
+  /* Letter spacing */
+  --tracking-tight: -0.02em;
+  --tracking-normal: 0;
+  --tracking-wide: 0.02em;
+}
+
+/* ===== SPACING TOKENS (8px base unit) ===== */
+:root {
+  --space-0:   0;
+  --space-1:   0.25rem;  /* 4px */
+  --space-2:   0.5rem;   /* 8px */
+  --space-3:   0.75rem;  /* 12px */
+  --space-4:   1rem;     /* 16px */
+  --space-5:   1.25rem;  /* 20px */
+  --space-6:   1.5rem;   /* 24px */
+  --space-8:   2rem;     /* 32px */
+  --space-10:  2.5rem;   /* 40px */
+  --space-12:  3rem;     /* 48px */
+  --space-16:  4rem;     /* 64px */
+  --space-20:  5rem;     /* 80px */
+}
+
+/* ===== BORDER RADIUS ===== */
+:root {
+  --radius-none: 0;
+  --radius-sm:   0.25rem;  /* 4px */
+  --radius-md:   0.5rem;   /* 8px */
+  --radius-lg:   0.75rem;  /* 12px */
+  --radius-xl:   1rem;     /* 16px */
+  --radius-2xl:  1.5rem;   /* 24px */
+  --radius-full: 9999px;
+}
+
+/* ===== TRANSITION TOKENS ===== */
+:root {
+  --duration-fast:    100ms;
+  --duration-normal:  200ms;
+  --duration-slow:    300ms;
+  --duration-slower:  500ms;
+
+  --ease-out:   cubic-bezier(0.4, 0, 0.2, 1);
+  --ease-in:    cubic-bezier(0.4, 0, 1, 1);
+  --ease-in-out: cubic-bezier(0.4, 0, 0.2, 1);
+  --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+/* ===== Z-INDEX SCALE ===== */
+:root {
+  --z-dropdown:   100;
+  --z-sticky:     200;
+  --z-fixed:      300;
+  --z-modal-back: 400;
+  --z-modal:      500;
+  --z-popover:    600;
+  --z-tooltip:    700;
+  --z-toast:      800;
+}
+
+/* ===== BREAKPOINTS (for reference — use container queries where possible) ===== */
+:root {
+  --bp-sm:  640px;
+  --bp-md:  768px;
+  --bp-lg:  1024px;
+  --bp-xl:  1280px;
+  --bp-2xl: 1536px;
+}
+
+/* ===== CONTAINER WIDTHS ===== */
+:root {
+  --container-sm:  640px;
+  --container-md:  768px;
+  --container-lg:  1024px;
+  --container-xl:  1280px;
+  --container-2xl: 1400px;
+  --container-app: 720px; /* Mobile app max width */
+}
+
+/* ===== FOCUS RING (Accessible, consistent) ===== */
+:root {
+  --focus-ring-width: 2px;
+  --focus-ring-offset: 2px;
+  --focus-ring-color: var(--color-brand-500);
+}
+
+/* ===== COMPONENT TOKENS ===== */
+:root {
+  /* Button */
+  --btn-height-sm: 36px;
+  --btn-height-md: 44px;  /* Minimum touch target */
+  --btn-height-lg: 52px;
+  --btn-padding-x-sm: 0.75rem;
+  --btn-padding-x-md: 1rem;
+  --btn-padding-x-lg: 1.5rem;
+
+  /* Input */
+  --input-height: 44px;  /* Minimum touch target */
+  --input-padding-x: 0.875rem;
+  --input-padding-y: 0.625rem;
+
+  /* Card */
+  --card-padding: 1rem;
+  --card-gap: 0.75rem;
+
+  /* Progress ring */
+  --progress-ring-size-sm: 48px;
+  --progress-ring-size-md: 64px;
+  --progress-ring-size-lg: 96px;
+  --progress-ring-stroke: 4px;
+  --progress-ring-stroke-lg: 6px;
+
+  /* Bottom nav */
+  --bottom-nav-height: 72px;  /* Includes safe area */
+  --bottom-nav-item-height: 56px;
+}
+
+/* ===== UTILITY CLASSES ===== */
+
+/* Visually hidden (for screen readers) */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* Focus visible — only show on keyboard focus */
+:focus:not(:focus-visible) { outline: none; }
+:focus-visible {
+  outline: none;
+  ring: var(--focus-ring-width) solid var(--focus-ring-color);
+  ring-offset: var(--focus-ring-offset);
+  ring-offset-color: var(--color-bg-primary);
+}
+
+/* Skip link */
+.skip-link {
+  position: absolute;
+  top: -100%;
+  left: var(--space-4);
+  padding: var(--space-2) var(--space-4);
+  background: var(--color-brand-600);
+  color: white;
+  border-radius: var(--radius-md);
+  z-index: var(--z-tooltip);
+  transition: top var(--duration-fast) var(--ease-out);
+}
+.skip-link:focus { top: var(--space-4); }
+
+/* Safe area insets */
+.safe-top { padding-top: env(safe-area-inset-top); }
+.safe-bottom { padding-bottom: env(safe-area-inset-bottom); }
+.safe-left { padding-left: env(safe-area-inset-left); }
+.safe-right { padding-right: env(safe-area-inset-right); }
+
+/* Scrollbar hiding */
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+.scrollbar-hide::-webkit-scrollbar { display: none; }
+
+/* Text balance for headings */
+.text-balance { text-wrap: balance; }
+
+/* Touch manipulation */
+.touch-manipulation { touch-action: manipulation; }
+
+/* Tap highlight */
+.tap-transparent { -webkit-tap-highlight-color: transparent; }
+
+/* Animations */
+@keyframes fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+@keyframes slide-in-up {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@keyframes slide-in-down {
+  from { opacity: 0; transform: translateY(-10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@keyframes scale-in {
+  from { opacity: 0; transform: scale(0.95); }
+  to { opacity: 1; transform: scale(1); }
+}
+@keyframes pulse-soft {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.6; }
+}
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+.animate-fade-in { animation: fade-in var(--duration-normal) var(--ease-out); }
+.animate-slide-up { animation: slide-in-up var(--duration-normal) var(--ease-out); }
+.animate-slide-down { animation: slide-in-down var(--duration-normal) var(--ease-out); }
+.animate-scale-in { animation: scale-in var(--duration-fast) var(--ease-spring); }
+.animate-pulse-soft { animation: pulse-soft 2s ease-in-out infinite; }
+.animate-spin { animation: spin 1s linear infinite; }
+
+/* Reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+  :root {
+    --color-border-default: currentColor;
+    --focus-ring-width: 3px;
+  }
+}
+
+/* Print styles */
+@media print {
+  .no-print { display: none !important; }
+  .print-break-inside-avoid { break-inside: avoid; }
+}

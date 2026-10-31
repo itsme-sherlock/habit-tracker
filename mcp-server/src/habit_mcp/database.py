@@ -2,7 +2,9 @@
 from __future__ import annotations
 import os
 from datetime import date, datetime
+from pathlib import Path
 from typing import Optional, List, Dict, Any
+from dotenv import load_dotenv
 from supabase import create_client, Client
 from .models import (
     Habit, HabitCreate, HabitUpdate,
@@ -380,6 +382,8 @@ class Database:
 
 def get_database() -> Database:
     """Create database instance from environment variables."""
+    # mcp-server/.env, independent of the client's working directory or envFile support
+    load_dotenv(Path(__file__).resolve().parents[2] / ".env")
     url = os.getenv("SUPABASE_URL")
     key = os.getenv("SUPABASE_KEY")
     user_id = os.getenv("SUPABASE_USER_ID")

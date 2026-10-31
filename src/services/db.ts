@@ -284,6 +284,16 @@ export async function importAllData(json: string): Promise<void> {
   }
 
   await tx.done;
+
+  for (const habit of data.habits || []) {
+    await enqueueSync('habits', 'create', habit.id, habit);
+  }
+  for (const task of data.tasks || []) {
+    await enqueueSync('tasks', 'create', task.id, task);
+  }
+  for (const completion of data.completions || []) {
+    await enqueueSync('completions', 'update', completion.date, completion);
+  }
 }
 
 // Clear all data

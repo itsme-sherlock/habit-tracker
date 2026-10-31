@@ -1,5 +1,6 @@
-import { Check, Plus, Minus, Circle, CheckCircle } from 'lucide-react';
+import { Check, Plus, Minus } from 'lucide-react';
 import type { Habit, StudyTask } from '../types';
+import { TaskResources } from './TaskResources';
 import { getNotificationIcon, getCategoryColor, formatDuration } from '../utils/notifications';
 
 interface ChecklistItemProps {
@@ -10,83 +11,49 @@ interface ChecklistItemProps {
   onToggle: () => void;
   onIncrement?: () => void;
   onDecrement?: () => void;
+  menu?: React.ReactNode;
 }
 
-export function ChecklistItem({ type, habit, task, completed, onToggle, onIncrement, onDecrement }: ChecklistItemProps) {
+export function ChecklistItem({ type, habit, task, completed, onToggle, onIncrement, onDecrement, menu }: ChecklistItemProps) {
   if (type === 'habit' && habit) {
     const progress = Math.min((completed / habit.targetCount) * 100, 100);
     const isComplete = completed >= habit.targetCount;
 
     return (
-      <div className="card p-4 flex items-center gap-4 animate-slide-in">
-        <div className="relative w-12 h-12 flex-shrink-0">
-          <svg className="progress-ring w-full h-full" viewBox="0 0 48 48">
+      <div className="habit-row animate-slide-in w-full">
+        <div className="relative w-10 h-10 flex-shrink-0" aria-hidden="true">
+          <svg className="w-full h-full -rotate-90" viewBox="0 0 48 48">
+            <circle className="ring-track" fill="none" strokeWidth="5" cx="24" cy="24" r="20" />
             <circle
-              className="text-gray-200 dark:text-gray-700"
               fill="none"
-              strokeWidth="4"
-              stroke="currentColor"
-              cx="24"
-              cy="24"
-              r="20"
-            />
-            <circle
-              className={`progress-ring-circle ${
-                isComplete ? 'text-green-500' : 'text-primary-500'
-              }`}
-              fill="none"
-              strokeWidth="4"
+              strokeWidth="5"
               strokeDasharray={`${(progress / 100) * 125.66} 125.66`}
               strokeLinecap="round"
               cx="24"
               cy="24"
               r="20"
-              stroke="currentColor"
+              style={{ stroke: isComplete ? 'var(--success)' : 'var(--accent)', transition: 'stroke-dasharray 0.4s ease' }}
             />
-            {isComplete && (
-              <text
-                x="50%"
-                y="50%"
-                dominantBaseline="middle"
-                textAnchor="middle"
-                className="text-green-500 text-[14px]"
-              >
-                ✓
-              </text>
-            )}
           </svg>
+          {isComplete && <Check className="absolute inset-0 m-auto w-5 h-5" style={{ color: 'var(--success)' }} strokeWidth={3} />}
         </div>
 
         <div className="flex-1 min-w-0">
-          <h3 className="font-medium text-gray-900 dark:text-gray-100 truncate">
-            {habit.name}
-          </h3>
-          <p className="text-sm text-gray-500 dark:text-gray-400">
+          <h3 className="habit-name">{habit.name}</h3>
+          <p className="habit-meta tabular-nums" aria-live="polite">
             {completed}/{habit.targetCount} {habit.unit}
           </p>
         </div>
 
-        <div className="flex items-center gap-2">
-          <button
-            onClick={onDecrement}
-            disabled={completed <= 0}
-            className="p-2 rounded-lg bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700 disabled:opacity-50 transition-colors"
-            aria-label="Decrement"
-          >
-            <Minus className="w-5 h-5" />
+        <div className="stepper" role="group" aria-label={`${habit.name} progress`}>
+          <button onClick={onDecrement} disabled={completed <= 0} aria-label={`Decrease ${habit.name}`}>
+            <Minus className="w-4 h-4" aria-hidden="true" />
           </button>
-          <span className="w-10 text-center font-medium text-lg">
-            {completed}
-          </span>
-          <button
-            onClick={onIncrement}
-            disabled={isComplete}
-            className="p-2 rounded-lg bg-primary-100 dark:bg-primary-900 text-primary-600 dark:text-primary-400 hover:bg-primary-200 dark:hover:bg-primary-800 disabled:opacity-50 transition-colors"
-            aria-label="Increment"
-          >
-            <Plus className="w-5 h-5" />
+          <button onClick={onIncrement} disabled={isComplete} aria-label={`Increase ${habit.name}`} className="stepper-add">
+            <Plus className="w-4 h-4" aria-hidden="true" />
           </button>
         </div>
+        {menu}
       </div>
     );
   }
@@ -131,6 +98,7 @@ export function ChecklistItem({ type, habit, task, completed, onToggle, onIncrem
               {task.description}
             </p>
           )}
+          <TaskResources task={task} />
         </div>
       </div>
     );

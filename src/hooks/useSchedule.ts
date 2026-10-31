@@ -9,6 +9,7 @@ import {
   type StudyTask,
 } from '../services/db';
 import { format, addDays, parseISO, isBefore, isAfter } from 'date-fns';
+import { initializeApp } from '../utils/init';
 
 export function useSchedule() {
   const [tasks, setTasks] = useState<Record<string, StudyTask[]>>({});
@@ -107,12 +108,11 @@ export function useSchedule() {
     return tasks[date] || [];
   }, [tasks]);
 
-  // Load current week by default
+  // Load every task (the plan spans months) once seeding has finished
   useEffect(() => {
-    const today = format(new Date(), 'yyyy-MM-dd');
-    const weekStart = format(addDays(new Date(), -new Date().getDay()), 'yyyy-MM-dd');
-    const weekEnd = format(addDays(new Date(), 6 - new Date().getDay()), 'yyyy-MM-dd');
-    loadTasksForRange(weekStart, weekEnd);
+    initializeApp()
+      .catch(console.error)
+      .finally(() => loadTasksForRange('0000-01-01', '9999-12-31'));
   }, [loadTasksForRange]);
 
   return {

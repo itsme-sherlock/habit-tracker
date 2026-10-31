@@ -1,7 +1,40 @@
 import { useState } from 'react';
-import { Plus, Trash2, GripVertical } from 'lucide-react';
+import { Plus, Trash2, Pencil, MoreVertical } from 'lucide-react';
 import type { Habit } from '../types';
 import { ChecklistItem } from './ChecklistItem';
+
+function HabitMenu({ habit, onEdit, onDelete }: { habit: Habit; onEdit?: (h: Habit) => void; onDelete?: (id: string) => void }) {
+  const [open, setOpen] = useState(false);
+  return (
+    <div className="relative">
+      <button
+        type="button"
+        className="icon-button"
+        aria-label={`More actions for ${habit.name}`}
+        aria-haspopup="menu"
+        aria-expanded={open}
+        onClick={() => setOpen(o => !o)}
+        onBlur={(e) => { if (!e.currentTarget.parentElement?.contains(e.relatedTarget as Node)) setOpen(false); }}
+      >
+        <MoreVertical className="w-5 h-5" aria-hidden="true" />
+      </button>
+      {open && (
+        <div role="menu" className="menu-pop" onBlur={(e) => { if (!e.currentTarget.parentElement?.contains(e.relatedTarget as Node)) setOpen(false); }}>
+          {onEdit && (
+            <button role="menuitem" onClick={() => { setOpen(false); onEdit(habit); }}>
+              <Pencil className="w-4 h-4" aria-hidden="true" /> Edit
+            </button>
+          )}
+          {onDelete && (
+            <button role="menuitem" className="danger" onClick={() => { setOpen(false); onDelete(habit.id); }}>
+              <Trash2 className="w-4 h-4" aria-hidden="true" /> Delete
+            </button>
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
 
 interface HabitListProps {
   habits: Habit[];
@@ -75,8 +108,8 @@ export function HabitList({
   };
 
   return (
-    <div className="space-y-3">
-      {habits.map((habit, index) => {
+    <div className="habit-list">
+      {habits.map((habit) => {
         const completed = completions[habit.id] || 0;
         const isDragging = draggingId === habit.id;
 
@@ -90,45 +123,17 @@ export function HabitList({
             onDragEnd={handleDragEnd}
             className={`transition-opacity ${isDragging ? 'opacity-50' : ''}`}
           >
-            <div className="flex items-center gap-2">
-              {editable && onReorder && (
-                <button
-                  className="p-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 cursor-grab active:cursor-grabbing"
-                  aria-label="Drag to reorder"
-                >
-                  <GripVertical className="w-5 h-5" />
-                </button>
-              )}
-              <ChecklistItem
-                type="habit"
-                habit={habit}
-                completed={completed}
-                onIncrement={() => onIncrement(habit.id)}
-                onDecrement={() => onDecrement(habit.id)}
-              />
-              {editable && (
-                <div className="flex items-center gap-1 ml-auto">
-                  {onEdit && (
-                    <button
-                      onClick={() => onEdit(habit)}
-                      className="p-2 text-gray-400 hover:text-primary-500 transition-colors"
-                      aria-label="Edit habit"
-                    >
-                      ✏️
-                    </button>
-                  )}
-                  {onDelete && (
-                    <button
-                      onClick={() => onDelete(habit.id)}
-                      className="p-2 text-gray-400 hover:text-red-500 transition-colors"
-                      aria-label="Delete habit"
-                    >
-                      <Trash2 className="w-5 h-5" />
-                    </button>
-                  )}
-                </div>
-              )}
-            </div>
+            <ChecklistItem
+              type="habit"
+              habit={habit}
+              completed={completed}
+              onToggle={() => {}}
+              onIncrement={() => onIncrement(habit.id)}
+              onDecrement={() => onDecrement(habit.id)}
+              menu={editable && (onEdit || onDelete) ? (
+                <HabitMenu habit={habit} onEdit={onEdit} onDelete={onDelete} />
+              ) : undefined}
+            />
           </div>
         );
       })}

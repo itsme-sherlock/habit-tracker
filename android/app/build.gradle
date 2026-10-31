@@ -16,10 +16,44 @@ android {
             ignoreAssetsPattern = '!.svn:!.git:!.ds_store:!*.scc:.*:!CVS:!thumbs.db:!picasa.ini:!*~'
         }
     }
+    signingConfigs {
+        release {
+            def keystorePath = System.getenv("ANDROID_KEYSTORE_PATH")
+            if (keystorePath) {
+                storeFile file(keystorePath)
+                storePassword System.getenv("ANDROID_KEYSTORE_PASSWORD")
+                keyAlias System.getenv("ANDROID_KEY_ALIAS")
+                keyPassword System.getenv("ANDROID_KEY_PASSWORD")
+            }
+        }
+    }
     buildTypes {
         release {
             minifyEnabled false
+            if (System.getenv("ANDROID_KEYSTORE_PATH")) {
+                signingConfig signingConfigs.release
+            }
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+        }
+    }
+}
+
+tasks.configureEach {
+    if (name in ['bundleRelease', 'assembleRelease']) {
+        doFirst {
+            def requiredSigningVariables = [
+                'ANDROID_KEYSTORE_PATH',
+                'ANDROID_KEYSTORE_PASSWORD',
+                'ANDROID_KEY_ALIAS',
+                'ANDROID_KEY_PASSWORD'
+            ]
+            def missingVariables = requiredSigningVariables.findAll { !System.getenv(it) }
+            if (missingVariables) {
+                throw new GradleException("Missing release signing environment variables: ${missingVariables.join(', ')}")
+            }
+            if (!file(System.getenv('ANDROID_KEYSTORE_PATH')).isFile()) {
+                throw new GradleException('ANDROID_KEYSTORE_PATH must point to an existing keystore file.')
+            }
         }
     }
 }
