@@ -11,6 +11,26 @@ const CATEGORY = {
   'mock-exam': { label: 'Mock exam', Icon: FlaskConical, tone: 'tone-exam' },
 } as const;
 
+const subtaskKey = (taskId: string) => `subtasks:${taskId}`;
+
+function parseSubtasks(description?: string): string[] {
+  if (!description) return [];
+  return description
+    .split(/\n+|\s\|\s/)
+    .map(s => s.trim().replace(/\.$/, ''))
+    .filter(Boolean);
+}
+
+function loadChecked(taskId: string): number[] {
+  try {
+    const raw = localStorage.getItem(subtaskKey(taskId));
+    const parsed = raw ? JSON.parse(raw) : [];
+    return Array.isArray(parsed) ? parsed : [];
+  } catch {
+    return [];
+  }
+}
+
 interface TaskCardProps {
   task: StudyTask;
   isComplete: boolean;
@@ -22,6 +42,20 @@ export function TaskCard({ task, isComplete, onToggle }: TaskCardProps) {
   const { label, Icon, tone } = CATEGORY[task.category] ?? CATEGORY.study;
   const title = task.title.replace(/^(Learn|Hands-on):\s*/, '');
   const panelId = `task-${task.id}`;
+  const subtasks = parseSubtasks(task.description);
+  const [checked, setChecked] = useState<number[]>(() => loadChecked(task.id));
+
+  const toggleSubtask = (index: number) => {
+    setChecked(prev => {
+      const next = prev.includes(index) ? prev.filter(i => i !== index) : [...prev, index];
+      try {
+        localStorage.setItem(subtaskKey(task.id), JSON.stringify(next));
+      } catch {
+        // storage unavailable; keep in-memory state only
+      }
+      return next;
+    });
+  };
 
   return (
     <article className={`surface-card task-card ${tone} ${isComplete ? 'is-done' : ''}`}>
@@ -68,8 +102,29 @@ export function TaskCard({ task, isComplete, onToggle }: TaskCardProps) {
       </div>
 
       <div id={panelId} hidden={!open} className="px-4 pb-4 pl-[3.75rem]">
-        {task.description && (
-          <p className="text-sm leading-relaxed text-muted whitespace-pre-line">{task.description}</p>
+        {subtasks.length > 1 ? (
+          <ul className="space-y-2">
+            {subtasks.map((text, i) => {
+              const done = checked.includes(i);
+              return (
+                <li key={i}>
+                  <label className="flex items-start gap-2 text-sm leading-relaxed cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={done}
+                      onChange={() => toggleSubtask(i)}
+                      className="mt-1 h-4 w-4 flex-shrink-0 cursor-pointer"
+                    />
+                    <span className={done ? 'line-through text-muted' : 'text-muted'}>{text}</span>
+                  </label>
+                </li>
+              );
+            })}
+          </ul>
+        ) : (
+          task.description && (
+            <p className="text-sm leading-relaxed text-muted whitespace-pre-line">{task.description}</p>
+          )
         )}
         <TaskResources task={task} />
       </div>
