@@ -380,15 +380,17 @@ class Database:
         }
 
 
+# Shared user ID for no-auth sync mode (must match frontend sync.ts)
+SHARED_USER_ID = "shared-device"
+
 def get_database() -> Database:
     """Create database instance from environment variables."""
     # mcp-server/.env, independent of the client's working directory or envFile support
     load_dotenv(Path(__file__).resolve().parents[2] / ".env")
     url = os.getenv("SUPABASE_URL")
     key = os.getenv("SUPABASE_KEY")
-    user_id = os.getenv("SUPABASE_USER_ID")
 
-    if not all([url, key, user_id]):
-        raise ValueError("Missing required environment variables: SUPABASE_URL, SUPABASE_KEY, SUPABASE_USER_ID")
+    if not all([url, key]):
+        raise ValueError("Missing required environment variables: SUPABASE_URL, SUPABASE_KEY")
 
-    return Database(url, key, user_id)
+    return Database(url, key, SHARED_USER_ID)

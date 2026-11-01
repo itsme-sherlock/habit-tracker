@@ -72,10 +72,10 @@ export function useSupabaseSync() {
   }, [configured]);
 
   useEffect(() => {
-    if (user) startAutoSync();
-    else stopAutoSync();
+    // Start auto-sync with 10s interval for instant shared-device sync
+    startAutoSync(10_000);
     return stopAutoSync;
-  }, [user]);
+  }, []);
 
   const signIn = useCallback(async (email: string, password: string) => {
     setAuthError(null);

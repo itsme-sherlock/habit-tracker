@@ -1,0 +1,17 @@
+<frozen runpy>:130: RuntimeWarning: 'src.habit_mcp.server' found in sys.modules after import of package 'src.habit_mcp', but prior to execution of 'src.habit_mcp.server'; this may result in unpredictable behaviour
+Traceback (most recent call last):
+  File "<frozen runpy>", line 203, in _run_module_as_main
+  File "<frozen runpy>", line 88, in _run_code
+  File "C:\Users\LENOVO\Desktop\habit tracker\mcp-server\src\habit_mcp\server.py", line 61, in <module>
+    main()
+    ~~~~^^
+  File "C:\Users\LENOVO\Desktop\habit tracker\mcp-server\src\habit_mcp\server.py", line 50, in main
+    mcp = create_server()
+  File "C:\Users\LENOVO\Desktop\habit tracker\mcp-server\src\habit_mcp\server.py", line 20, in create_server
+    register_habit_tools(mcp)
+    ~~~~~~~~~~~~~~~~~~~~^^^^^
+  File "C:\Users\LENOVO\Desktop\habit tracker\mcp-server\src\habit_mcp\tools\habits.py", line 11, in register_habit_tools
+    db = get_database()
+  File "C:\Users\LENOVO\Desktop\habit tracker\mcp-server\src\habit_mcp\database.py", line 388, in get_database
+    raise ValueError("Missing required environment variables: SUPABASE_URL, SUPABASE_KEY, SUPABASE_USER_ID")
+ValueError: Missing required environment variables: SUPABASE_URL, SUPABASE_KEY, SUPABASE_USER_ID

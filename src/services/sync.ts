@@ -15,6 +15,9 @@ import {
 } from './supabase';
 import { deleteById, put } from './db';
 
+// Shared user ID for no-auth sync mode (all devices use same ID)
+const SHARED_USER_ID = 'shared-device';
+
 export type SyncOperationType = 'create' | 'update' | 'delete';
 export type SyncEntityType = 'habits' | 'tasks' | 'completions';
 
@@ -136,6 +139,7 @@ export async function enqueueSync(
     data,
     timestamp: Date.now(),
     retries: 0,
+    userId: SHARED_USER_ID,
   });
   await tx.done;
   await updatePendingCount();
@@ -309,25 +313,21 @@ export async function sync(): Promise<void> {
   updateStatus({ isSyncing: true, error: null });
   try {
     const client = getSupabaseClient();
-    const { data: { user }, error } = await client.auth.getUser();
-    if (error) throw error;
-    if (!user) {
-      updateStatus({ isSyncing: false, error: 'Sign in to sync data across devices.' });
-      return;
-    }
+    // No auth required - use shared ID
+    const userId = SHARED_USER_ID;
 
     const localSyncDB = await getSyncDB();
     const pending = await localSyncDB.getAll('syncQueue');
-    const hasPendingCreate = pending.some(item => item.operation === 'create' && (!item.userId || item.userId === user.id));
-    const metaKey = `lastSync:${user.id}`;
+    const hasPendingCreate = pending.some(item => item.operation === 'create' && (!item.userId || item.userId === userId));
+    const metaKey = `lastSync:${userId}`;
     const meta = await localSyncDB.get('syncMeta', metaKey);
     const since = meta && !hasPendingCreate
       ? new Date(Math.max(0, meta.value - 60_000)).toISOString()
       : undefined;
-    const remote = await fetchRemoteData(user.id, since);
-    const pushError = await pushChanges(user.id, remote);
-    const updatedRemote = await fetchRemoteData(user.id, since);
-    await mergeRemoteData(user.id, updatedRemote);
+    const remote = await fetchRemoteData(userId, since);
+    const pushError = await pushChanges(userId, remote);
+    const updatedRemote = await fetchRemoteData(userId, since);
+    await mergeRemoteData(userId, updatedRemote);
     await localSyncDB.put('syncMeta', { key: metaKey, value: Date.now() });
     updateStatus({
       isSyncing: false,
