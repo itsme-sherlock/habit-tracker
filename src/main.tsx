@@ -3,6 +3,7 @@ import ReactDOM from 'react-dom/client'
 import App from './App'
 import { initScheduler } from './services/scheduler'
 import { initializeApp } from './utils/init'
+import { reportStorageError } from './services/sync'
 import { registerSW } from 'virtual:pwa-register'
 
 // Initialize PWA service worker
@@ -21,7 +22,10 @@ registerSW({
 initScheduler()
 
 // Initialize app data (GCP curriculum)
-initializeApp().catch(console.error)
+initializeApp().catch(error => {
+  console.error(error)
+  reportStorageError(error)
+})
 
 // Handle beforeunload to persist scheduler state
 window.addEventListener('beforeunload', () => {

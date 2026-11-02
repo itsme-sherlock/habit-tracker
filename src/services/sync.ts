@@ -26,6 +26,11 @@ function updateStatus(partial: Partial<SyncStatus>): void {
   for (const listener of listeners) listener({ ...currentStatus });
 }
 
+export function reportStorageError(error: unknown): void {
+  const message = error instanceof Error ? error.message : String(error);
+  updateStatus({ error: `Cloud storage error: ${message}. Run supabase/migrations/20261102_no_login_shared_sync.sql in Supabase.` });
+}
+
 export function subscribeToSyncStatus(listener: (status: SyncStatus) => void): () => void {
   listeners.push(listener);
   listener({ ...currentStatus });
@@ -48,7 +53,15 @@ async function refresh(): Promise<void> {
   if (currentStatus.isSyncing) return;
   updateStatus({ isSyncing: true });
   try {
-    const { error } = await getSupabaseClient()
+    const client = getSupabaseClient();
+    const probeId = '00000000-0000-0000-0000-0000000000ff';
+    const { error: writeError } = await client.from('habits').upsert(
+      { id: probeId, name: '__sync_probe__', target_count: 1, unit: 'times', user_id: SHARED_OWNER_ID },
+      { onConflict: 'id' },
+    );
+    if (writeError) throw new Error(`write blocked: ${writeError.message}`);
+    await client.from('habits').delete().eq('id', probeId);
+    const { error } = await client
       .from('study_tasks')
       .select('id', { head: true, count: 'exact' })
       .eq('user_id', SHARED_OWNER_ID);
