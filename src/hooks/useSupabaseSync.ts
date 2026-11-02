@@ -24,7 +24,7 @@ export function useSupabaseSync() {
 
   useEffect(() => {
     if (!configured) return;
-    startAutoSync(10_000);
+    startAutoSync(2_000); // Faster sync: 2 seconds instead of 10
     return stopAutoSync;
   }, [configured]);
 

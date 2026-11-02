@@ -8,6 +8,7 @@ import { SettingsComponent } from './Settings';
 import { TaskCard } from './TaskCard';
 import { TodayHero } from './TodayHero';
 import { getCompletionForDate, saveDailyCompletion, getHabits, getTasksForDate, getSettings, saveSettings } from '../services/db';
+import { manualSync } from '../services/sync';
 import { useHabits } from '../hooks/useHabits';
 import { useSchedule } from '../hooks/useSchedule';
 import { ensurePlanSeeded } from '../utils/init';
@@ -107,6 +108,7 @@ export function Dashboard() {
       console.error('Failed to save habit progress:', error);
       setHabitSaveError('Could not save habit progress. Please try again.');
     });
+    void manualSync();
   };
 
   const handleIncrementHabit = (id: string) => updateHabitCompletion(id, 1);
@@ -115,6 +117,7 @@ export function Dashboard() {
   const handleToggleTask = async (id: string) => {
     await toggleTaskComplete(id, !todayTasks.find(t => t.id === id)?.completed);
     loadCompletion();
+    void manualSync();
   };
 
   const handleEndDay = async () => {
@@ -133,6 +136,7 @@ export function Dashboard() {
     setShowEndDayModal(false);
     setEndDayNotes('');
     setEndDayMood(3);
+    void manualSync();
   };
 
   const handleEditHabit = (habit: Habit) => {

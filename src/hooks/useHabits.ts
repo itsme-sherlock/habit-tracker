@@ -7,6 +7,7 @@ import {
   reorderHabits,
   type Habit,
 } from '../services/db';
+import { manualSync } from '../services/sync';
 
 export function useHabits() {
   const [habits, setHabits] = useState<Habit[]>([]);
@@ -34,17 +35,20 @@ export function useHabits() {
   const createHabit = useCallback(async (habit: Omit<Habit, 'id' | 'createdAt' | 'order'>) => {
     const newHabit = await addHabit(habit);
     setHabits(prev => [...prev, newHabit]);
+    void manualSync();
     return newHabit;
   }, []);
 
   const editHabit = useCallback(async (id: string, updates: Partial<Habit>) => {
     await updateHabit(id, updates);
     setHabits(prev => prev.map(h => (h.id === id ? { ...h, ...updates } : h)));
+    void manualSync();
   }, []);
 
   const removeHabit = useCallback(async (id: string) => {
     await deleteHabit(id);
     setHabits(prev => prev.filter(h => h.id !== id));
+    void manualSync();
   }, []);
 
   const moveHabit = useCallback(async (habitIds: string[]) => {
@@ -54,6 +58,7 @@ export function useHabits() {
       const map = new Map(prev.map(h => [h.id, h]));
       return habitIds.map(id => map.get(id)!).filter(Boolean);
     });
+    void manualSync();
   }, []);
 
   const incrementHabit = useCallback(async (id: string) => {

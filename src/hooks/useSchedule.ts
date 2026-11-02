@@ -10,6 +10,7 @@ import {
 } from '../services/db';
 import { format, addDays, parseISO, isBefore, isAfter } from 'date-fns';
 import { ensurePlanSeeded } from '../utils/init';
+import { manualSync } from '../services/sync';
 
 export function useSchedule() {
   const [tasks, setTasks] = useState<Record<string, StudyTask[]>>({});
@@ -53,6 +54,7 @@ export function useSchedule() {
       const dateTasks = prev[task.date] || [];
       return { ...prev, [task.date]: [...dateTasks, newTask] };
     });
+    void manualSync();
     return newTask;
   }, []);
 
@@ -68,6 +70,7 @@ export function useSchedule() {
         [task.date]: dateTasks.map(t => (t.id === id ? { ...t, ...updates } : t)),
       };
     });
+    void manualSync();
   }, [tasks]);
 
   const removeTask = useCallback(async (id: string) => {
@@ -82,6 +85,7 @@ export function useSchedule() {
         [task.date]: dateTasks.filter(t => t.id !== id),
       };
     });
+    void manualSync();
   }, [tasks]);
 
   const bulkCreateTasks = useCallback(async (newTasks: Omit<StudyTask, 'id'>[]) => {
@@ -94,6 +98,7 @@ export function useSchedule() {
       }
       return next;
     });
+    void manualSync();
     return created;
   }, []);
 
@@ -102,6 +107,7 @@ export function useSchedule() {
     if (!task) return;
 
     await editTask(id, { completed, completedAt: completed ? Date.now() : undefined });
+    void manualSync();
   }, [tasks, editTask]);
 
   const getTasksForDate = useCallback((date: string) => {
