@@ -11,7 +11,7 @@ CREATE TABLE habits (
     description TEXT,
     frequency TEXT DEFAULT 'daily',
     target_count INTEGER NOT NULL DEFAULT 1,
-    unit TEXT NOT NULL DEFAULT 'times' CHECK (unit IN ('times', 'hours', 'minutes')),
+    unit TEXT NOT NULL DEFAULT 'times',
     created_at TIMESTAMPTZ DEFAULT NOW(),
     "order" INTEGER DEFAULT 0,
     user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,

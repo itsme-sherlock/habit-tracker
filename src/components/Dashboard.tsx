@@ -10,6 +10,7 @@ import { TodayHero } from './TodayHero';
 import { getCompletionForDate, saveDailyCompletion, getHabits, getTasksForDate, getSettings, saveSettings } from '../services/db';
 import { useHabits } from '../hooks/useHabits';
 import { useSchedule } from '../hooks/useSchedule';
+import { ensurePlanSeeded } from '../utils/init';
 import { useNotifications } from '../hooks/useNotifications';
 import { usePWA } from '../hooks/usePWA';
 import { useSupabaseSync } from '../hooks/useSupabaseSync';
@@ -39,7 +40,7 @@ export function Dashboard() {
   }, []);
 
   const { habits, loading: habitsLoading, createHabit, editHabit, removeHabit, moveHabit, refresh: refreshHabits } = useHabits();
-  const { tasks, loading: tasksLoading, createTask, editTask, removeTask, toggleTaskComplete, getTasksForDate, loadTasksForDate, loadTasksForRange } = useSchedule();
+  const { tasks, loading: tasksLoading, error: tasksError, createTask, editTask, removeTask, toggleTaskComplete, getTasksForDate, loadTasksForDate, loadTasksForRange } = useSchedule();
   const { settings: notificationSettings, updateSettings, triggerTest } = useNotifications();
   const { installable, installed, install, updateAvailable, applyUpdate, offline } = usePWA();
   const cloudSync = useSupabaseSync();
@@ -72,7 +73,7 @@ export function Dashboard() {
   useEffect(() => {
     if (!signedInUserId || !cloudSync.syncStatus.lastSyncTime) return;
     void refreshHabits();
-    void loadTasksForRange('0000-01-01', '9999-12-31');
+    void ensurePlanSeeded().catch(console.error).finally(() => loadTasksForRange('0000-01-01', '9999-12-31'));
     void loadCompletion();
   }, [signedInUserId, cloudSync.syncStatus.lastSyncTime, refreshHabits, loadTasksForRange, loadCompletion]);
 
@@ -301,6 +302,11 @@ export function Dashboard() {
           <div>Tasks Loading: <span className="font-mono">{tasksLoading ? 'Yes' : 'No'}</span></div>
           <div>Habits Loading: <span className="font-mono">{habitsLoading ? 'Yes' : 'No'}</span></div>
         </div>
+        {tasksError && (
+          <div className="mt-2 p-2 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded text-red-700 dark:text-red-300">
+            ❌ Error: {tasksError}
+          </div>
+        )}
         {!isDateInCurriculum && (
           <div className="mt-2 p-2 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded text-red-700 dark:text-red-300">
             ⚠️ Selected date is outside the curriculum range ({curriculumStart} - {curriculumEnd}).
@@ -309,6 +315,12 @@ export function Dashboard() {
         )}
         {tasksLoading && (
           <div className="mt-2 text-blue-700 dark:text-blue-300">Loading tasks...</div>
+        )}
+        {totalTasksLoaded === 0 && !tasksLoading && isDateInCurriculum && (
+          <div className="mt-2 p-2 bg-orange-50 dark:bg-orange-900/20 border border-orange-200 dark:border-orange-800 rounded text-orange-700 dark:text-orange-300">
+            ⚠️ No tasks loaded yet. The curriculum tasks should auto-seed on first run.
+            If this persists, try refreshing the page.
+          </div>
         )}
       </div>
 

@@ -18,6 +18,15 @@ export function initializeApp(): Promise<void> {
   return running;
 }
 
+// Re-seeds when the store has no plan tasks (e.g. an earlier seed failed before the cloud tables were ready).
+export async function ensurePlanSeeded(): Promise<void> {
+  await initializeApp();
+  const tasks = await getAll<StudyTask>('studyTasks');
+  if (tasks.some(t => t.date >= PLAN_START && t.date <= PLAN_END)) return;
+  running = null;
+  await initializeApp();
+}
+
 async function run(): Promise<void> {
   // Repair data duplicated or corrupted by earlier double-seeding.
   const habits = await getAll<Habit>('habits');
@@ -53,16 +62,23 @@ async function run(): Promise<void> {
     }
   }
 
-  for (const habit of DEFAULT_HABITS) {
-    if (!seenHabits.has(habit.name.toLowerCase())) {
-      await addHabit(habit);
-    }
-  }
-
+  // Seed the plan first and keep a habit failure from blocking it.
   const missing = [...getCurriculumTasks(), ...PRODUCTION_CURRICULUM].filter(t => !seenTasks.has(`${t.date}|${t.title}`));
   if (missing.length > 0) {
     await bulkAddStudyTasks(missing);
   }
+
+  let habitError: unknown;
+  for (const habit of DEFAULT_HABITS) {
+    if (!seenHabits.has(habit.name.toLowerCase())) {
+      try {
+        await addHabit(habit);
+      } catch (err) {
+        habitError ??= err;
+      }
+    }
+  }
+  if (habitError) throw habitError;
 
   if (!settings.initialized || settings.planVersion !== PLAN_VERSION) {
     await saveSettings({ ...settings, initialized: true, planVersion: PLAN_VERSION });

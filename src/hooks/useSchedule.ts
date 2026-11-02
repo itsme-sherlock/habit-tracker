@@ -9,7 +9,7 @@ import {
   type StudyTask,
 } from '../services/db';
 import { format, addDays, parseISO, isBefore, isAfter } from 'date-fns';
-import { initializeApp } from '../utils/init';
+import { ensurePlanSeeded } from '../utils/init';
 
 export function useSchedule() {
   const [tasks, setTasks] = useState<Record<string, StudyTask[]>>({});
@@ -110,8 +110,11 @@ export function useSchedule() {
 
   // Load every task (the plan spans months) once seeding has finished
   useEffect(() => {
-    initializeApp()
-      .catch(console.error)
+    ensurePlanSeeded()
+      .catch(err => {
+        console.error(err);
+        setError(`Could not load the study plan: ${err instanceof Error ? err.message : String(err)}`);
+      })
       .finally(() => loadTasksForRange('0000-01-01', '9999-12-31'));
   }, [loadTasksForRange]);
 
