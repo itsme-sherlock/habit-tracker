@@ -43,11 +43,12 @@ export function useSupabaseSync() {
       .then(() => {
         if (!active) return null;
         const client = getSupabaseClient();
-        const { data: { subscription } } = client.auth.onAuthStateChange((_event, session) => {
+        const { data: { subscription } } = client.auth.onAuthStateChange((event, session) => {
           if (!active) return;
           setUser(session?.user ? { id: session.user.id, email: session.user.email ?? '' } : null);
           setAuthError(null);
           setIsLoadingAuth(false);
+          if (event === 'SIGNED_IN') void manualSync();
         });
         unsubscribe = () => subscription.unsubscribe();
         return client.auth.getSession();
@@ -58,6 +59,7 @@ export function useSupabaseSync() {
         const sessionUser = result.data.session?.user;
         setUser(sessionUser ? { id: sessionUser.id, email: sessionUser.email ?? '' } : null);
         setIsLoadingAuth(false);
+        if (sessionUser) void manualSync();
       })
       .catch(error => {
         if (!active) return;
@@ -72,10 +74,10 @@ export function useSupabaseSync() {
   }, [configured]);
 
   useEffect(() => {
-    // Start auto-sync with 10s interval for instant shared-device sync
+    if (!configured) return;
     startAutoSync(10_000);
     return stopAutoSync;
-  }, []);
+  }, [configured]);
 
   const signIn = useCallback(async (email: string, password: string) => {
     setAuthError(null);

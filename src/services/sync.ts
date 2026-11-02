@@ -15,8 +15,8 @@ import {
 } from './supabase';
 import { deleteById, put } from './db';
 
-// Shared user ID for no-auth sync mode (all devices use same ID)
-const SHARED_USER_ID = 'shared-device';
+// Queue items created before account-based sync may still carry this old marker.
+const LEGACY_SHARED_USER_ID = 'shared-device';
 
 export type SyncOperationType = 'create' | 'update' | 'delete';
 export type SyncEntityType = 'habits' | 'tasks' | 'completions';
@@ -139,7 +139,6 @@ export async function enqueueSync(
     data,
     timestamp: Date.now(),
     retries: 0,
-    userId: SHARED_USER_ID,
   });
   await tx.done;
   await updatePendingCount();
@@ -196,9 +195,9 @@ async function pushChanges(userId: string, remote: RemoteData): Promise<string |
   let firstError: string | null = null;
 
   for (const original of queue) {
-    if (original.userId && original.userId !== userId) continue;
-    const item = original.userId ? original : { ...original, userId };
-    if (!original.userId) await db.put('syncQueue', item);
+    if (original.userId && original.userId !== userId && original.userId !== LEGACY_SHARED_USER_ID) continue;
+    const item = { ...original, userId };
+    if (original.userId !== userId) await db.put('syncQueue', item);
 
     try {
       if (item.operation === 'delete') {
@@ -242,6 +241,14 @@ async function pushChanges(userId: string, remote: RemoteData): Promise<string |
         const task = item.data as StudyTask;
         const equivalent = remote.tasks.find(row => row.id !== item.entityId && sameSeedTask(task, row));
         if (equivalent) {
+          const remoteUpdatedAt = Date.parse(equivalent.updated_at ?? equivalent.created_at);
+          if (item.operation === 'update' && item.timestamp > remoteUpdatedAt) {
+            const { error } = await client.from('study_tasks').upsert({
+              id: equivalent.id,
+              ...toSupabaseTask(task, userId),
+            }, { onConflict: 'id' });
+            if (error) throw error;
+          }
           await deleteById('studyTasks', item.entityId);
         } else {
           const { error } = await client.from('study_tasks').upsert({
@@ -279,7 +286,7 @@ async function mergeRemoteData(userId: string, remote: RemoteData): Promise<void
   const db = await getSyncDB();
   const pending = await db.getAll('syncQueue');
   const pendingKeys = new Set(
-    pending.filter(item => !item.userId || item.userId === userId)
+    pending.filter(item => !item.userId || item.userId === userId || item.userId === LEGACY_SHARED_USER_ID)
       .map(item => `${item.entityType}:${item.entityId}`),
   );
 
@@ -313,12 +320,19 @@ export async function sync(): Promise<void> {
   updateStatus({ isSyncing: true, error: null });
   try {
     const client = getSupabaseClient();
-    // No auth required - use shared ID
-    const userId = SHARED_USER_ID;
+    const { data: { session }, error: sessionError } = await client.auth.getSession();
+    if (sessionError) throw sessionError;
+    if (!session?.user) {
+      throw new Error('Sign in with the same account on each device to sync your data.');
+    }
+    const userId = session.user.id;
 
     const localSyncDB = await getSyncDB();
     const pending = await localSyncDB.getAll('syncQueue');
-    const hasPendingCreate = pending.some(item => item.operation === 'create' && (!item.userId || item.userId === userId));
+    const hasPendingCreate = pending.some(item =>
+      item.operation === 'create'
+      && (!item.userId || item.userId === userId || item.userId === LEGACY_SHARED_USER_ID),
+    );
     const metaKey = `lastSync:${userId}`;
     const meta = await localSyncDB.get('syncMeta', metaKey);
     const since = meta && !hasPendingCreate
