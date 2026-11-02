@@ -53,10 +53,21 @@ export function useSupabaseSync() {
         unsubscribe = () => subscription.unsubscribe();
         return client.auth.getSession();
       })
-      .then(result => {
+      .then(async result => {
         if (!result || !active) return;
         if (result.error) throw result.error;
-        const sessionUser = result.data.session?.user;
+        let sessionUser = result.data.session?.user;
+        const autoEmail = import.meta.env.VITE_SYNC_EMAIL as string | undefined;
+        const autoPassword = import.meta.env.VITE_SYNC_PASSWORD as string | undefined;
+        if (!sessionUser && autoEmail && autoPassword) {
+          // Personal-use auto sign-in so every device shares one account without a login screen.
+          const { data, error } = await getSupabaseClient().auth.signInWithPassword({
+            email: autoEmail,
+            password: autoPassword,
+          });
+          if (error) throw error;
+          sessionUser = data.user ?? undefined;
+        }
         setUser(sessionUser ? { id: sessionUser.id, email: sessionUser.email ?? '' } : null);
         setIsLoadingAuth(false);
         if (sessionUser) void manualSync();
