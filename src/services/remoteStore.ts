@@ -108,10 +108,16 @@ export async function remotePutMany(store: RemoteStore, values: unknown[]): Prom
   if (values.length === 0) return;
   const client = getSupabaseClient();
   const onConflict = store === 'dailyCompletions' ? 'date,user_id' : 'id';
+  // One upsert cannot touch the same row twice, so keep the last value per key.
+  const unique = new Map<string, Record<string, unknown>>();
+  for (const value of values) {
+    const row = rowFor(store, value);
+    unique.set(String(store === 'dailyCompletions' ? row.date : row.id), row);
+  }
+  const all = [...unique.values()];
   const chunk = 200;
-  for (let i = 0; i < values.length; i += chunk) {
-    const rows = values.slice(i, i + chunk).map(value => rowFor(store, value));
-    const { error } = await client.from(TABLES[store]).upsert(rows, { onConflict });
+  for (let i = 0; i < all.length; i += chunk) {
+    const { error } = await client.from(TABLES[store]).upsert(all.slice(i, i + chunk), { onConflict });
     fail(error);
   }
 }

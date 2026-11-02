@@ -49,6 +49,12 @@ export function Dashboard() {
   const todayTasks = getTasksForDate(selectedDate);
   const todayCompletion = completion?.date === selectedDate ? completion : null;
 
+  // Debug: Show task loading state
+  const totalTasksLoaded = Object.values(tasks).flat().length;
+  const curriculumStart = '2026-11-01';
+  const curriculumEnd = '2027-03-01';
+  const isDateInCurriculum = selectedDate >= curriculumStart && selectedDate <= curriculumEnd;
+
   // Load completion for selected date
   const loadCompletion = useCallback(async () => {
     const requestId = ++completionLoadIdRef.current;
@@ -281,6 +287,30 @@ export function Dashboard() {
           </div>
         </div>
       </header>
+
+      {/* Debug Panel */}
+      <div className="mx-4 mb-3 p-3 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg text-xs">
+        <div className="font-medium text-yellow-800 dark:text-yellow-200 mb-1">Debug Info</div>
+        <div className="grid grid-cols-2 gap-2 text-gray-700 dark:text-gray-300">
+          <div>Selected Date: <span className="font-mono">{selectedDate}</span></div>
+          <div>Today: <span className="font-mono">{isTodaySelected ? 'Yes' : 'No'}</span></div>
+          <div>In Curriculum Range: <span className="font-mono">{isDateInCurriculum ? 'Yes' : 'No'}</span></div>
+          <div>Curriculum Range: <span className="font-mono">{curriculumStart} to {curriculumEnd}</span></div>
+          <div>Total Tasks Loaded: <span className="font-mono">{totalTasksLoaded}</span></div>
+          <div>Tasks for Selected Date: <span className="font-mono">{todayTasks.length}</span></div>
+          <div>Tasks Loading: <span className="font-mono">{tasksLoading ? 'Yes' : 'No'}</span></div>
+          <div>Habits Loading: <span className="font-mono">{habitsLoading ? 'Yes' : 'No'}</span></div>
+        </div>
+        {!isDateInCurriculum && (
+          <div className="mt-2 p-2 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded text-red-700 dark:text-red-300">
+            ⚠️ Selected date is outside the curriculum range ({curriculumStart} - {curriculumEnd}).
+            Use the date navigation arrows to select a date within the curriculum.
+          </div>
+        )}
+        {tasksLoading && (
+          <div className="mt-2 text-blue-700 dark:text-blue-300">Loading tasks...</div>
+        )}
+      </div>
 
       {/* Progress Ring */}
       <div className="dashboard-overview-wrap">
