@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Moon, Sun, Monitor, Download, Upload, Trash2, RefreshCw, AlertTriangle, Cloud, LogIn, LogOut } from 'lucide-react';
+import { Moon, Sun, Monitor, Download, Upload, Trash2, RefreshCw, AlertTriangle, Cloud, LogIn } from 'lucide-react';
 import type { AppSettings } from '../types';
 import { saveSettings, exportAllData, importAllData, clearAllData } from '../services/db';
 import { NotificationSettingsComponent } from './NotificationSettings';
@@ -114,18 +114,6 @@ export function SettingsComponent({ settings, onSettingsChange, account }: Setti
     }
   };
 
-  const handleSignOut = async () => {
-    setAccountBusy(true);
-    account.setAuthError(null);
-    try {
-      await account.signOut();
-    } catch (error) {
-      account.setAuthError(error instanceof Error ? error.message : 'Could not sign out.');
-    } finally {
-      setAccountBusy(false);
-    }
-  };
-
   const handleSync = async () => {
     setAccountBusy(true);
     try {
@@ -153,7 +141,7 @@ export function SettingsComponent({ settings, onSettingsChange, account }: Setti
         ) : account.user ? (
           <div className="space-y-3">
             <p className="text-sm text-gray-700 dark:text-gray-300">
-              Signed in as <span className="font-medium">{account.user.email}</span>
+              Storage: <span className="font-medium">{account.user.email}</span>
             </p>
             {account.syncStatus.error ? (
               <p role="alert" className="text-sm text-red-600 dark:text-red-400">{account.syncStatus.error}</p>
@@ -172,10 +160,7 @@ export function SettingsComponent({ settings, onSettingsChange, account }: Setti
             <div className="flex gap-2">
               <button type="button" className="btn-secondary flex-1" onClick={handleSync} disabled={accountBusy || account.syncStatus.isSyncing || !account.syncStatus.isOnline}>
                 <RefreshCw className={`w-4 h-4 mr-2 ${account.syncStatus.isSyncing ? 'animate-spin' : ''}`} />
-                Sync now
-              </button>
-              <button type="button" className="btn-secondary flex-1" onClick={handleSignOut} disabled={accountBusy}>
-                <LogOut className="w-4 h-4 mr-2" /> Sign out
+                Refresh now
               </button>
             </div>
           </div>

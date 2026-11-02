@@ -1,12 +1,7 @@
-/** Authentication and sync lifecycle for the Supabase-backed account. */
+/** Shared-storage sync lifecycle: no login, every device uses the same Supabase rows. */
 import { useCallback, useEffect, useState } from 'react';
-import {
-  getSupabaseClient,
-  isSupabaseConfigured,
-  signInWithEmail,
-  signUpWithEmail,
-  signOut as supabaseSignOut,
-} from '../services/supabase';
+import { isSupabaseConfigured } from '../services/supabase';
+import { SHARED_OWNER_ID } from '../services/remoteStore';
 import {
   manualSync,
   startAutoSync,
@@ -16,98 +11,37 @@ import {
   type SyncStatus,
 } from '../services/sync';
 
-interface AccountUser {
-  id: string;
-  email: string;
-}
+const SHARED_USER = { id: SHARED_OWNER_ID, email: 'Shared cloud storage (no login)' };
 
 export function useSupabaseSync() {
-  const [user, setUser] = useState<AccountUser | null>(null);
-  const [isLoadingAuth, setIsLoadingAuth] = useState(() => isSupabaseConfigured());
+  const configured = isSupabaseConfigured();
   const [authError, setAuthError] = useState<string | null>(() =>
-    isSupabaseConfigured() ? null : 'Set VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY to enable account sync.',
+    configured ? null : 'Set VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY to enable cloud storage.',
   );
   const [syncStatus, setSyncStatus] = useState<SyncStatus>(getSyncStatus());
-  const configured = isSupabaseConfigured();
 
   useEffect(() => subscribeToSyncStatus(setSyncStatus), []);
 
   useEffect(() => {
-    if (!configured) {
-      return;
-    }
-
-    let active = true;
-    let unsubscribe = () => {};
-    void Promise.resolve()
-      .then(() => {
-        if (!active) return null;
-        const client = getSupabaseClient();
-        const { data: { subscription } } = client.auth.onAuthStateChange((event, session) => {
-          if (!active) return;
-          setUser(session?.user ? { id: session.user.id, email: session.user.email ?? '' } : null);
-          setAuthError(null);
-          setIsLoadingAuth(false);
-          if (event === 'SIGNED_IN') void manualSync();
-        });
-        unsubscribe = () => subscription.unsubscribe();
-        return client.auth.getSession();
-      })
-      .then(async result => {
-        if (!result || !active) return;
-        if (result.error) throw result.error;
-        const sessionUser = result.data.session?.user;
-        setUser(sessionUser ? { id: sessionUser.id, email: sessionUser.email ?? '' } : null);
-        setIsLoadingAuth(false);
-        if (sessionUser) void manualSync();
-      })
-      .catch(error => {
-        if (!active) return;
-        setAuthError(error instanceof Error ? error.message : 'Could not restore your sign-in session.');
-        setIsLoadingAuth(false);
-      });
-
-    return () => {
-      active = false;
-      unsubscribe();
-    };
-  }, [configured]);
-
-  useEffect(() => {
     if (!configured) return;
     startAutoSync(10_000);
-    void manualSync();
     return stopAutoSync;
   }, [configured]);
 
-  const signIn = useCallback(async (email: string, password: string) => {
-    setAuthError(null);
-    await signInWithEmail(email, password);
-  }, []);
-
-  const signUp = useCallback(async (email: string, password: string) => {
-    setAuthError(null);
-    await signUpWithEmail(email, password);
-  }, []);
-
-  const signOut = useCallback(async () => {
-    await supabaseSignOut();
-    setUser(null);
-  }, []);
-
+  const noop = useCallback(async () => {}, []);
   const triggerSync = useCallback(async () => {
     await manualSync();
   }, []);
 
   return {
-    user,
-    isLoadingAuth,
+    user: configured ? SHARED_USER : null,
+    isLoadingAuth: false,
     authError,
     setAuthError,
     configured,
-    signIn,
-    signUp,
-    signOut,
+    signIn: noop,
+    signUp: noop,
+    signOut: noop,
     syncStatus,
     triggerSync,
     isSyncing: syncStatus.isSyncing,

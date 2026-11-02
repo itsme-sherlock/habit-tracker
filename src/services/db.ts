@@ -1,6 +1,16 @@
 import { openDB, DBSchema, IDBPDatabase } from 'idb';
 import type { Habit, StudyTask, DailyCompletion, AppSettings, NotificationSettings } from '../types';
-import { enqueueSync } from './sync';
+import { isSupabaseConfigured } from './supabase';
+import {
+  deterministicUuid,
+  isRemoteStore,
+  remoteClearAll,
+  remoteDelete,
+  remoteGetAll,
+  remoteGetById,
+  remoteGetTasksByDate,
+  remotePutMany,
+} from './remoteStore';
 
 interface HabitTrackerDB extends DBSchema {
   habits: {
@@ -63,22 +73,34 @@ export function getDB(): Promise<IDBPDatabase<HabitTrackerDB>> {
 }
 
 // Generic CRUD helpers
+// Habits, tasks and completions live only in Supabase when it is configured.
+function useRemote(storeName: string): storeName is 'habits' | 'studyTasks' | 'dailyCompletions' {
+  return isSupabaseConfigured() && isRemoteStore(storeName);
+}
+
 export async function getAll<T>(storeName: keyof HabitTrackerDB): Promise<T[]> {
+  if (useRemote(storeName)) return (await remoteGetAll(storeName)) as T[];
   const db = await getDB();
   return db.getAll(storeName as any);
 }
 
 export async function getById<T>(storeName: keyof HabitTrackerDB, id: string): Promise<T | undefined> {
+  if (useRemote(storeName)) return (await remoteGetById(storeName, id)) as T | undefined;
   const db = await getDB();
   return db.get(storeName as any, id);
 }
 
 export async function put<T>(storeName: keyof HabitTrackerDB, value: T): Promise<string> {
+  if (useRemote(storeName)) {
+    await remotePutMany(storeName, [value]);
+    return String((value as { id?: string; date?: string }).id ?? (value as { date?: string }).date ?? '');
+  }
   const db = await getDB();
   return db.put(storeName as any, value as any);
 }
 
 export async function deleteById(storeName: keyof HabitTrackerDB, id: string): Promise<void> {
+  if (useRemote(storeName)) return remoteDelete(storeName, id);
   const db = await getDB();
   return db.delete(storeName as any, id);
 }
@@ -88,14 +110,17 @@ export async function getByIndex<T>(
   indexName: string,
   value: string | number
 ): Promise<T[]> {
+  if (storeName === 'studyTasks' && indexName === 'by-date' && isSupabaseConfigured()) {
+    return (await remoteGetTasksByDate(String(value))) as T[];
+  }
   const db = await getDB();
   return db.getAllFromIndex(storeName as any, indexName, value);
 }
 
 // Specific helpers for habits
 export async function getHabits(): Promise<Habit[]> {
-  const db = await getDB();
-  return db.getAllFromIndex('habits', 'by-order');
+  const habits = await getAll<Habit>('habits');
+  return habits.sort((a, b) => a.order - b.order);
 }
 
 export async function addHabit(habit: Omit<Habit, 'id' | 'createdAt' | 'order'>): Promise<Habit> {
@@ -107,7 +132,6 @@ export async function addHabit(habit: Omit<Habit, 'id' | 'createdAt' | 'order'>)
     order: habits.length,
   };
   await put('habits', newHabit);
-  await enqueueSync('habits', 'create', newHabit.id, newHabit);
   return newHabit;
 }
 
@@ -116,13 +140,11 @@ export async function updateHabit(id: string, updates: Partial<Habit>): Promise<
   if (habit) {
     const updated = { ...habit, ...updates };
     await put('habits', updated);
-    await enqueueSync('habits', 'update', id, updated);
   }
 }
 
 export async function deleteHabit(id: string): Promise<void> {
   await deleteById('habits', id);
-  await enqueueSync('habits', 'delete', id);
   // Reorder remaining habits
   const habits = await getHabits();
   for (let i = 0; i < habits.length; i++) {
@@ -144,8 +166,7 @@ export async function getTasksForDate(date: string): Promise<StudyTask[]> {
 }
 
 export async function getTasksForDateRange(startDate: string, endDate: string): Promise<StudyTask[]> {
-  const db = await getDB();
-  const allTasks = await db.getAll('studyTasks');
+  const allTasks = await getAll<StudyTask>('studyTasks');
   return allTasks.filter(task => task.date >= startDate && task.date <= endDate);
 }
 
@@ -155,7 +176,6 @@ export async function addStudyTask(task: Omit<StudyTask, 'id'>): Promise<StudyTa
     id: crypto.randomUUID(),
   };
   await put('studyTasks', newTask);
-  await enqueueSync('tasks', 'create', newTask.id, newTask);
   return newTask;
 }
 
@@ -164,32 +184,29 @@ export async function updateStudyTask(id: string, updates: Partial<StudyTask>): 
   if (task) {
     const updated = { ...task, ...updates };
     await put('studyTasks', updated);
-    await enqueueSync('tasks', 'update', id, updated);
   }
 }
 
 export async function deleteStudyTask(id: string): Promise<void> {
   await deleteById('studyTasks', id);
-  await enqueueSync('tasks', 'delete', id);
 }
 
 export async function bulkAddStudyTasks(tasks: Omit<StudyTask, 'id'>[]): Promise<StudyTask[]> {
+  // Deterministic ids make seeding idempotent when several devices start at once.
+  const results: StudyTask[] = tasks.map(task => ({
+    ...task,
+    id: isSupabaseConfigured() ? deterministicUuid(`${task.date}|${task.title}`) : crypto.randomUUID(),
+  }));
+  if (isSupabaseConfigured()) {
+    await remotePutMany('studyTasks', results);
+    return results;
+  }
   const db = await getDB();
   const tx = db.transaction('studyTasks', 'readwrite');
-  const results: StudyTask[] = [];
-  for (const task of tasks) {
-    const newTask: StudyTask = { ...task, id: crypto.randomUUID() };
-    await tx.store.put(newTask);
-    results.push(newTask);
-  }
+  for (const task of results) await tx.store.put(task);
   await tx.done;
-  // Queue all for sync
-  for (const task of results) {
-    await enqueueSync('tasks', 'create', task.id, task);
-  }
   return results;
 }
-
 // Specific helpers for daily completions
 export async function getCompletionForDate(date: string): Promise<DailyCompletion | undefined> {
   return getById<DailyCompletion>('dailyCompletions', date);
@@ -197,12 +214,10 @@ export async function getCompletionForDate(date: string): Promise<DailyCompletio
 
 export async function saveDailyCompletion(completion: DailyCompletion): Promise<void> {
   await put('dailyCompletions', completion);
-  await enqueueSync('completions', 'update', completion.date, completion);
 }
 
 export async function getCompletionsForRange(startDate: string, endDate: string): Promise<DailyCompletion[]> {
-  const db = await getDB();
-  const all = await db.getAll('dailyCompletions');
+  const all = await getAll<DailyCompletion>('dailyCompletions');
   return all.filter(c => c.date >= startDate && c.date <= endDate);
 }
 
@@ -261,43 +276,15 @@ export async function exportAllData(): Promise<string> {
 
 export async function importAllData(json: string): Promise<void> {
   const data = JSON.parse(json);
-  const db = await getDB();
-  const tx = db.transaction(['habits', 'studyTasks', 'dailyCompletions', 'settings'], 'readwrite');
-
-  if (data.habits) {
-    for (const habit of data.habits) {
-      await tx.store.put(habit);
-    }
-  }
-  if (data.tasks) {
-    for (const task of data.tasks) {
-      await tx.store.put(task);
-    }
-  }
-  if (data.completions) {
-    for (const completion of data.completions) {
-      await tx.store.put(completion);
-    }
-  }
-  if (data.settings) {
-    await tx.store.put({ id: 'app', ...data.settings });
-  }
-
-  await tx.done;
-
-  for (const habit of data.habits || []) {
-    await enqueueSync('habits', 'create', habit.id, habit);
-  }
-  for (const task of data.tasks || []) {
-    await enqueueSync('tasks', 'create', task.id, task);
-  }
-  for (const completion of data.completions || []) {
-    await enqueueSync('completions', 'update', completion.date, completion);
-  }
+  if (data.habits) for (const habit of data.habits) await put('habits', habit);
+  if (data.tasks) for (const task of data.tasks) await put('studyTasks', task);
+  if (data.completions) for (const completion of data.completions) await put('dailyCompletions', completion);
+  if (data.settings) await saveSettings(data.settings);
 }
 
 // Clear all data
 export async function clearAllData(): Promise<void> {
+  if (isSupabaseConfigured()) await remoteClearAll();
   const db = await getDB();
   const tx = db.transaction(['habits', 'studyTasks', 'dailyCompletions', 'settings', 'pushSubscription'], 'readwrite');
   await Promise.all([
