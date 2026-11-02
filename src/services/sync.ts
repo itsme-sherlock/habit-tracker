@@ -17,6 +17,7 @@ import { deleteById, put } from './db';
 
 // Queue items created before account-based sync may still carry this old marker.
 const LEGACY_SHARED_USER_ID = 'shared-device';
+const SHARED_OWNER_ID = '00000000-0000-0000-0000-000000000001';
 
 export type SyncOperationType = 'create' | 'update' | 'delete';
 export type SyncEntityType = 'habits' | 'tasks' | 'completions';
@@ -320,12 +321,8 @@ export async function sync(): Promise<void> {
   updateStatus({ isSyncing: true, error: null });
   try {
     const client = getSupabaseClient();
-    const { data: { session }, error: sessionError } = await client.auth.getSession();
-    if (sessionError) throw sessionError;
-    if (!session?.user) {
-      throw new Error('Sign in with the same account on each device to sync your data.');
-    }
-    const userId = session.user.id;
+    // Single-owner app: every device reads/writes the same fixed row owner, no login.
+    const userId = SHARED_OWNER_ID;
 
     const localSyncDB = await getSyncDB();
     const pending = await localSyncDB.getAll('syncQueue');

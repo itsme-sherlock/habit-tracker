@@ -56,18 +56,7 @@ export function useSupabaseSync() {
       .then(async result => {
         if (!result || !active) return;
         if (result.error) throw result.error;
-        let sessionUser = result.data.session?.user;
-        const autoEmail = import.meta.env.VITE_SYNC_EMAIL as string | undefined;
-        const autoPassword = import.meta.env.VITE_SYNC_PASSWORD as string | undefined;
-        if (!sessionUser && autoEmail && autoPassword) {
-          // Personal-use auto sign-in so every device shares one account without a login screen.
-          const { data, error } = await getSupabaseClient().auth.signInWithPassword({
-            email: autoEmail,
-            password: autoPassword,
-          });
-          if (error) throw error;
-          sessionUser = data.user ?? undefined;
-        }
+        const sessionUser = result.data.session?.user;
         setUser(sessionUser ? { id: sessionUser.id, email: sessionUser.email ?? '' } : null);
         setIsLoadingAuth(false);
         if (sessionUser) void manualSync();
@@ -87,6 +76,7 @@ export function useSupabaseSync() {
   useEffect(() => {
     if (!configured) return;
     startAutoSync(10_000);
+    void manualSync();
     return stopAutoSync;
   }, [configured]);
 
