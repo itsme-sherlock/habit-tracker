@@ -12,6 +12,7 @@ import { getCompletionForDate, saveDailyCompletion, getHabits, getTasksForDate, 
 import { manualSync } from '../services/sync';
 import { useHabits } from '../hooks/useHabits';
 import { useSchedule } from '../hooks/useSchedule';
+import { useSpacedRepetition } from '../hooks/useSpacedRepetition';
 import { ensurePlanSeeded } from '../utils/init';
 import { useNotifications } from '../hooks/useNotifications';
 import { usePWA } from '../hooks/usePWA';
@@ -42,7 +43,8 @@ export function Dashboard() {
   }, []);
 
   const { habits, loading: habitsLoading, createHabit, editHabit, removeHabit, moveHabit, refresh: refreshHabits } = useHabits();
-  const { tasks, loading: tasksLoading, createTask, editTask, removeTask, toggleTaskComplete, getTasksForDate, loadTasksForDate, loadTasksForRange } = useSchedule();
+  const { tasks, loading: tasksLoading, createTask, editTask, removeTask, toggleTaskComplete, getTasksForDate, loadTasksForDate, loadTasksForRange, getDueReviews } = useSchedule();
+  const { processReviewCompletion } = useSpacedRepetition();
   const { settings: notificationSettings, updateSettings, triggerTest } = useNotifications();
   const { installable, installed, install, updateAvailable, applyUpdate, offline } = usePWA();
   const cloudSync = useSupabaseSync();
@@ -193,6 +195,8 @@ export function Dashboard() {
           onToggleComplete={toggleTaskComplete}
           selectedDate={selectedDate}
           onSelectDate={setSelectedDate}
+          getDueReviews={getDueReviews}
+          onProcessReview={processReviewCompletion}
         />
       </div>
     );

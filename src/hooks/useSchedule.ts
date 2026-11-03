@@ -11,11 +11,14 @@ import {
 import { format, addDays, parseISO, isBefore, isAfter } from 'date-fns';
 import { ensurePlanSeeded } from '../utils/init';
 import { manualSync } from '../services/sync';
+import { useSpacedRepetition } from './useSpacedRepetition';
 
 export function useSchedule() {
   const [tasks, setTasks] = useState<Record<string, StudyTask[]>>({});
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+
+  const { scheduleReview, getDueReviews } = useSpacedRepetition();
 
   const loadTasksForDate = useCallback(async (date: string) => {
     try {
@@ -107,8 +110,15 @@ export function useSchedule() {
     if (!task) return;
 
     await editTask(id, { completed, completedAt: completed ? Date.now() : undefined });
+
+    // Schedule spaced review when completing a study or practice task
+    if (completed && (task.category === 'study' || task.category === 'practice')) {
+      // Default to "Good" (2) rating
+      void scheduleReview(task, 2);
+    }
+
     void manualSync();
-  }, [tasks, editTask]);
+  }, [tasks, editTask, scheduleReview]);
 
   const getTasksForDate = useCallback((date: string) => {
     return tasks[date] || [];
@@ -136,6 +146,7 @@ export function useSchedule() {
     bulkCreateTasks,
     toggleTaskComplete,
     getTasksForDate,
+    getDueReviews,
   };
 }
 

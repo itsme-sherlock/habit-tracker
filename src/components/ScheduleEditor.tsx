@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Calendar, Plus, Trash2, ChevronLeft, ChevronRight, MoreHorizontal } from 'lucide-react';
+import { Calendar, Plus, Trash2, ChevronLeft, ChevronRight, MoreHorizontal, RotateCcw, Zap } from 'lucide-react';
 import { format, parseISO, addDays, addWeeks, startOfWeek, endOfWeek, isSameDay, isToday, getDay } from 'date-fns';
 import type { StudyTask } from '../types';
 import { getNotificationIcon, getCategoryColor, formatDuration } from '../utils/notifications';
@@ -12,15 +12,25 @@ interface ScheduleEditorProps {
   onToggleComplete: (id: string, completed: boolean) => Promise<void>;
   selectedDate: string;
   onSelectDate: (date: string) => void;
+  getDueReviews: (date: string) => Promise<StudyTask[]>;
+  onProcessReview: (reviewTask: StudyTask, rating: 0 | 1 | 2 | 3) => Promise<void>;
 }
 
-const CATEGORIES = ['study', 'practice', 'review', 'mock-exam'] as const;
+const CATEGORIES = ['study', 'practice', 'review', 'spaced-review', 'mock-exam'] as const;
 const CATEGORY_LABELS: Record<string, string> = {
   study: 'Study',
   practice: 'Practice',
   review: 'Review',
+  'spaced-review': 'Spaced Review',
   'mock-exam': 'Mock Exam',
 };
+
+const RATING_LABELS = {
+  0: { label: 'Again', color: 'bg-red-500', desc: 'Reset to 1 day' },
+  1: { label: 'Hard', color: 'bg-orange-500', desc: '× 1.3' },
+  2: { label: 'Good', color: 'bg-green-500', desc: '× 2.0' },
+  3: { label: 'Easy', color: 'bg-blue-500', desc: '× 2.5' },
+} as const;
 
 export function ScheduleEditor({
   tasks,
@@ -30,6 +40,8 @@ export function ScheduleEditor({
   onToggleComplete,
   selectedDate,
   onSelectDate,
+  getDueReviews,
+  onProcessReview,
 }: ScheduleEditorProps) {
   const [viewDate, setViewDate] = useState(selectedDate);
   const [showModal, setShowModal] = useState(false);
@@ -40,6 +52,24 @@ export function ScheduleEditor({
     durationMinutes: 60,
     category: 'study' as const,
   });
+  const [dueReviews, setDueReviews] = useState<StudyTask[]>([]);
+  const [reviewsLoading, setReviewsLoading] = useState(false);
+
+  // Load due reviews when viewDate changes
+  useEffect(() => {
+    const loadReviews = async () => {
+      setReviewsLoading(true);
+      try {
+        const reviews = await getDueReviews(viewDate);
+        setDueReviews(reviews);
+      } catch (err) {
+        console.error('Failed to load due reviews:', err);
+      } finally {
+        setReviewsLoading(false);
+      }
+    };
+    loadReviews();
+  }, [viewDate, getDueReviews]);
 
   const weekStart = startOfWeek(parseISO(viewDate), { weekStartsOn: 0 });
   const weekEnd = endOfWeek(parseISO(viewDate), { weekStartsOn: 0 });
@@ -116,6 +146,62 @@ export function ScheduleEditor({
           <ChevronRight className="w-5 h-5" />
         </button>
       </div>
+
+      {/* Reviews Due Section */}
+      {dueReviews.length > 0 && (
+        <div className="card p-4 border-l-4 border-purple-500 bg-purple-50 dark:bg-purple-900/20">
+          <div className="flex items-center justify-between mb-3">
+            <div className="flex items-center gap-2">
+              <RotateCcw className="w-5 h-5 text-purple-500" />
+              <h3 className="font-semibold text-purple-700 dark:text-purple-300">
+                Reviews Due ({dueReviews.length})
+              </h3>
+            </div>
+            {reviewsLoading && (
+              <span className="text-xs text-purple-500 animate-pulse">Loading...</span>
+            )}
+          </div>
+          <div className="space-y-2">
+            {dueReviews.map(review => (
+              <div key={review.id} className="p-3 bg-white dark:bg-gray-800 rounded-lg border border-purple-200 dark:border-purple-800">
+                <div className="flex items-start justify-between gap-2 mb-2">
+                  <div className="flex-1 min-w-0">
+                    <p className="font-medium text-gray-900 dark:text-gray-100 truncate">{review.title}</p>
+                    <p className="text-xs text-gray-500 dark:text-gray-400">
+                      Source: {review.sourceTaskId ? 'Linked task' : 'Unknown'} •
+                      Review #{review.reviewCount} • Interval: {review.reviewInterval}d
+                    </p>
+                    {review.description && (
+                      <p className="text-xs text-gray-400 dark:text-gray-500 mt-1 line-clamp-2">{review.description}</p>
+                    )}
+                  </div>
+                  <Zap className="w-5 h-5 text-purple-500 flex-shrink-0" />
+                </div>
+                <div className="flex flex-wrap gap-2">
+                  {([0, 1, 2, 3] as const).map(rating => {
+                    const r = RATING_LABELS[rating];
+                    return (
+                      <button
+                        key={rating}
+                        onClick={async () => {
+                          await onProcessReview(review, rating);
+                          // Refresh reviews after processing
+                          const updated = await getDueReviews(viewDate);
+                          setDueReviews(updated);
+                        }}
+                        className={`px-3 py-1.5 rounded-lg text-xs font-medium text-white transition-all hover:scale-105 ${r.color}`}
+                        title={r.desc}
+                      >
+                        {r.label}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* Week View */}
       <div className="overflow-x-auto">

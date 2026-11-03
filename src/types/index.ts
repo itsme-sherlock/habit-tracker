@@ -15,9 +15,17 @@ export interface StudyTask {
   title: string;
   description?: string;
   durationMinutes: number;
-  category: 'study' | 'practice' | 'review' | 'mock-exam';
+  category: 'study' | 'practice' | 'review' | 'spaced-review' | 'mock-exam';
   completed: boolean;
   completedAt?: number;
+  // Spaced repetition fields
+  nextReviewDate?: string;        // YYYY-MM-DD
+  reviewInterval?: number;        // days until next review
+  reviewCount?: number;           // times reviewed (0 = never)
+  sourceTaskId?: string;          // link to original study/practice task
+  easeFactor?: number;            // SM-2 ease factor (default 2.5)
+  isSpacedReview?: boolean;       // true for algorithmic reviews (vs daily drills)
+  lastReviewRating?: 0 | 1 | 2 | 3; // 0=Again, 1=Hard, 2=Good, 3=Easy
 }
 
 export interface DailyCompletion {
