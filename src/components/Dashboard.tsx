@@ -1,9 +1,10 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
-import { CheckCircle, Target, Calendar, ChevronLeft, ChevronRight, Sun, Moon, Settings, Download, RefreshCw, Monitor, Star, Plus } from 'lucide-react';
+import { CheckCircle, Target, Calendar, ChevronLeft, ChevronRight, Sun, Moon, Settings, Download, RefreshCw, Monitor, Star, Plus, BarChart } from 'lucide-react';
 import { format, parseISO, addDays, isToday, isSameDay, startOfWeek, endOfWeek } from 'date-fns';
 import type { Habit, StudyTask, DailyCompletion, AppSettings } from '../types';
 import { HabitList } from './HabitList';
 import { ScheduleEditor } from './ScheduleEditor';
+import { Analytics } from './Analytics';
 import { SettingsComponent } from './Settings';
 import { TaskCard } from './TaskCard';
 import { TodayHero } from './TodayHero';
@@ -17,7 +18,7 @@ import { usePWA } from '../hooks/usePWA';
 import { useSupabaseSync } from '../hooks/useSupabaseSync';
 import { useTheme } from '../context/ThemeContext';
 
-type View = 'today' | 'schedule' | 'settings';
+type View = 'today' | 'schedule' | 'analytics' | 'settings';
 
 function currentTimestamp(): number {
   return Date.now();
@@ -193,6 +194,23 @@ export function Dashboard() {
           selectedDate={selectedDate}
           onSelectDate={setSelectedDate}
         />
+      </div>
+    );
+  }
+
+  if (view === 'analytics') {
+    return (
+      <div className="p-4 pb-20">
+        <div className="flex items-center justify-between mb-4">
+          <h1 className="text-xl font-bold text-gray-900 dark:text-gray-100">Analytics</h1>
+          <button
+            onClick={() => setView('today')}
+            className="btn-secondary"
+          >
+            ← Today
+          </button>
+        </div>
+        <Analytics />
       </div>
     );
   }
@@ -399,10 +417,11 @@ export function Dashboard() {
 
       {/* Bottom Navigation */}
       <nav aria-label="Primary" className="fixed bottom-0 left-0 right-0 backdrop-blur-sm border-t safe-area-inset-bottom" style={{ background: 'color-mix(in srgb, var(--surface) 94%, transparent)', borderColor: 'var(--border)' }}>
-        <div className="grid grid-cols-3 max-w-2xl mx-auto">
+        <div className="grid grid-cols-4 max-w-2xl mx-auto">
           {([
             ['today', 'Today', Sun],
             ['schedule', 'Schedule', Calendar],
+            ['analytics', 'Analytics', BarChart],
             ['settings', 'Settings', Settings],
           ] as const).map(([key, label, NavIcon]) => (
             <button
