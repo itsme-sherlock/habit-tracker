@@ -1,0 +1,31 @@
+{
+  "date": "2026-11-16",
+  "topic": "GCP BigQuery & Dataflow Production Architecture",
+  "summary": "Production mechanics for BigQuery slot allocation, partitioning optimization, and Apache Beam streaming watermarks.",
+  "keyConcepts": [
+    "Capacitor Columnar Format: Encodes columns with run-length, dictionary, and bit-packed compression. Prunes unreferenced columns before scanning.",
+    "Borg Compute Slots: Dynamic slot allocator. On-demand queries compete for a pool of shared slots; BigQuery Editions provide dedicated slot reservations with autoscaling.",
+    "Partitioning vs Clustering: Partitioning divides tables physically by ingestion time or DATE column (max 4,000 partitions). Clustering sorts data by up to 4 columns within partitions for block-level skipping."
+  ],
+  "failureModes": [
+    "Slot Starvation & Execution Spill to Disk: Complex multi-way joins with unpartitioned data exhaust available slots; intermediate stages spill to persistent shuffle disk, causing query latency to spike from 10s to 30 mins.",
+    "Partition Pruning Failure: Wrapping a partitioned column in a SQL function (e.g. `WHERE DATE(timestamp_col) = ...` instead of `WHERE timestamp_col >= ...`) causes BigQuery to perform a full table scan, multiplying cost 50x."
+  ],
+  "metricsScale": [
+    "Scanned volume reduced from 14 TB to 120 GB per run using ingestion-date partitioning and clustering on `user_id, status`.",
+    "Average monthly BigQuery spend optimized by 38% after implementing reservation commitments with 100 baseline slots and 200 autoscale ceiling."
+  ],
+  "interviewQA": [
+    {
+      "question": "How do you optimize a query scanning multiple terabytes in BigQuery?",
+      "answer": "First, check execution details in INFORMATION_SCHEMA.JOBS to see slot usage and spilled bytes. Apply DATE partitioning to restrict scanned blocks, cluster by high-cardinality filter columns, avoid SELECT *, and pre-filter with CTEs before heavy joins."
+    },
+    {
+      "question": "When would you choose BigQuery Editions over on-demand pricing?",
+      "answer": "When query patterns are steady, predictable, or exceed $10,000/month in on-demand scanning costs ($6.25/TB). Editions (Standard, Enterprise, Enterprise Plus) allow reserved slot commitments, budget caps, and autoscaling slots with VPC service controls."
+    }
+  ],
+  "codeSnippet": "-- Optimized BigQuery MERGE with Partition Pruning\nMERGE INTO dataset.fact_events T\nUSING dataset.stg_events S\nON T.event_date = S.event_date AND T.event_id = S.event_id\nWHEN MATCHED THEN UPDATE SET T.updated_at = CURRENT_TIMESTAMP(), T.payload = S.payload\nWHEN NOT MATCHED THEN INSERT (event_date, event_id, payload, created_at)\nVALUES (S.event_date, S.event_id, S.payload, CURRENT_TIMESTAMP());",
+  "updatedAt": 1794828211551,
+  "rawMarkdown": "# Day 2026-11-16: GCP BigQuery & Dataflow Production Architecture\n\n> **Level**: 4-Year Experienced GCP Data Engineer Reference  \n> **Date**: 2026-11-16  \n> **Summary**: Production mechanics for BigQuery slot allocation, partitioning optimization, and Apache Beam streaming watermarks.\n\n---\n\n## 1. Internal Architecture & Core Concepts\n- **Capacitor Columnar Format**: Encodes columns with run-length, dictionary, and bit-packed compression. Prunes unreferenced columns before scanning.\n- **Borg Compute Slots**: Dynamic slot allocator. On-demand queries compete for a pool of shared slots; BigQuery Editions provide dedicated slot reservations with autoscaling.\n- **Partitioning vs Clustering**: Partitioning divides tables physically by ingestion time or DATE column (max 4,000 partitions). Clustering sorts data by up to 4 columns within partitions for block-level skipping.\n\n---\n\n## 2. Production Failure Modes & War Stories (4 YoE)\n### ⚠️ Slot Starvation & Execution Spill to Disk\nComplex multi-way joins with unpartitioned data exhaust available slots; intermediate stages spill to persistent shuffle disk, causing query latency to spike from 10s to 30 mins.\n\n### ⚠️ Partition Pruning Failure\nWrapping a partitioned column in a SQL function (e.g. `WHERE DATE(timestamp_col) = ...` instead of `WHERE timestamp_col >= ...`) causes BigQuery to perform a full table scan, multiplying cost 50x.\n\n---\n\n## 3. Production Scale & Metrics Benchmarks\n- Scanned volume reduced from 14 TB to 120 GB per run using ingestion-date partitioning and clustering on `user_id, status`.\n- Average monthly BigQuery spend optimized by 38% after implementing reservation commitments with 100 baseline slots and 200 autoscale ceiling.\n\n---\n\n## 4. Top 4-YoE Interview Questions & Spoken Answers\n### Q1: How do you optimize a query scanning multiple terabytes in BigQuery?\n**Spoken Answer:**\n> \"First, check execution details in INFORMATION_SCHEMA.JOBS to see slot usage and spilled bytes. Apply DATE partitioning to restrict scanned blocks, cluster by high-cardinality filter columns, avoid SELECT *, and pre-filter with CTEs before heavy joins.\"\n\n### Q2: When would you choose BigQuery Editions over on-demand pricing?\n**Spoken Answer:**\n> \"When query patterns are steady, predictable, or exceed $10,000/month in on-demand scanning costs ($6.25/TB). Editions (Standard, Enterprise, Enterprise Plus) allow reserved slot commitments, budget caps, and autoscaling slots with VPC service controls.\"\n\n---\n\n## 5. Production Code / SQL Blueprint\n```sql\n-- Optimized BigQuery MERGE with Partition Pruning\nMERGE INTO dataset.fact_events T\nUSING dataset.stg_events S\nON T.event_date = S.event_date AND T.event_id = S.event_id\nWHEN MATCHED THEN UPDATE SET T.updated_at = CURRENT_TIMESTAMP(), T.payload = S.payload\nWHEN NOT MATCHED THEN INSERT (event_date, event_id, payload, created_at)\nVALUES (S.event_date, S.event_id, S.payload, CURRENT_TIMESTAMP());\n```\n"
+}
