@@ -17,7 +17,6 @@ import { PipelineHero } from '../components/PipelineHero';
 import { TaskCard } from '../components/TaskCard';
 import { HabitSection } from '../components/HabitSection';
 import { DayReflection } from '../components/DayReflection';
-import { AIStudyNotesCard } from '../components/AIStudyNotesCard';
 import { CalendarModal } from '../components/CalendarModal';
 import { CatchupRadarCard } from '../components/CatchupRadarCard';
 import { getPrevDate, getNextDate, getDayNumber } from '../utils/date';
@@ -259,12 +258,6 @@ export const TodayScreen: React.FC<TodayScreenProps> = ({
             currentDate={currentDate}
             allTasks={allTasks}
             onSelectDate={onSelectDate}
-          />
-
-          {/* AI Study Notes & 4-YoE Interview Prep Card */}
-          <AIStudyNotesCard
-            currentDate={currentDate}
-            topicTitle={tasks[0]?.title}
           />
 
           {/* Today's Tasks Section */}
