@@ -2,18 +2,23 @@
 /**
  * Model Context Protocol (MCP) Server for DE60 Habit Tracker
  * 
- * Supports both:
- * 1. STDIO Transport: For local AI clients (Claude Desktop, Cursor, Antigravity CLI).
- * 2. Streamable HTTP / SSE Transport: For remote cloud deployment (Google Cloud Run, Railway, Render, ChatGPT).
+ * Built with the official @modelcontextprotocol/sdk.
+ * Supports:
+ * 1. STDIO Transport (Claude Desktop, Cursor, Antigravity CLI)
+ * 2. Official Streamable HTTP / SSE Transport (Google Cloud Run, Railway, Render, Remote MCP)
  */
 
 const fs = require('fs');
 const path = require('path');
-const http = require('http');
-const readline = require('readline');
+const express = require('express');
+const cors = require('cors');
+const { z } = require('zod');
+const { McpServer } = require('@modelcontextprotocol/sdk/server/mcp.js');
+const { StdioServerTransport } = require('@modelcontextprotocol/sdk/server/stdio.js');
+const { SSEServerTransport } = require('@modelcontextprotocol/sdk/server/sse.js');
 
 // ============================================================================
-// 1. Database & Config Initialization
+// 1. Supabase Client & Config Initialization
 // ============================================================================
 let createClient;
 try {
@@ -77,7 +82,6 @@ try {
   }
 } catch (e) {}
 
-// Fallback: If TypeScript extraction failed, load from JSON mirror
 if (!curriculumTasks || curriculumTasks.length === 0) {
   try {
     const jsonPath = path.join(__dirname, '../chatgpt-curriculum.json');
@@ -88,137 +92,51 @@ if (!curriculumTasks || curriculumTasks.length === 0) {
   } catch (e) {}
 }
 
-// Assign stable deterministic IDs to curriculum tasks
 curriculumTasks = curriculumTasks.map((t, idx) => ({
   ...t,
   id: `task_${t.date}_${t.category}_${idx}`,
 }));
 
-// ============================================================================
-// 3. MCP Tool Definitions (7 Comprehensive Tools)
-// ============================================================================
-const TOOLS = [
-  {
-    name: 'get_study_status',
-    description: 'Returns overall progress, active streak, and detects if and when you fell off track, identifying the earliest missed date and overdue backlog hours.',
-    inputSchema: {
-      type: 'object',
-      properties: {},
-    },
-  },
-  {
-    name: 'get_catchup_plan',
-    description: 'Generates an actionable, prioritized catch-up schedule to recover missed days based on extra hours you can commit per day.',
-    inputSchema: {
-      type: 'object',
-      properties: {
-        max_daily_extra_hours: {
-          type: 'number',
-          description: 'Maximum extra study hours per day you can allocate for catch-up (default 1.5).',
-        },
-      },
-    },
-  },
-  {
-    name: 'get_daily_curriculum',
-    description: 'Fetches syllabus tasks, durations, and instructions for any specific plan day (1–61) or date (YYYY-MM-DD).',
-    inputSchema: {
-      type: 'object',
-      properties: {
-        day: {
-          type: 'number',
-          description: 'Plan day number between 1 and 61 (e.g. 17).',
-        },
-        date: {
-          type: 'string',
-          description: 'Target date in YYYY-MM-DD format (e.g. 2026-11-17).',
-        },
-      },
-    },
-  },
-  {
-    name: 'generate_study_notes',
-    description: 'Generates genuine, topic-specific technical study notes (Concepts, Failure Modes, Architecture, and Interview Q&A) for a study day.',
-    inputSchema: {
-      type: 'object',
-      properties: {
-        date: {
-          type: 'string',
-          description: 'Target date in YYYY-MM-DD format (defaults to today).',
-        },
-      },
-    },
-  },
-  {
-    name: 'mark_task_completed',
-    description: 'Safely marks a study task completed or uncompleted with strict validation against curriculum IDs, updating Supabase cloud records.',
-    inputSchema: {
-      type: 'object',
-      properties: {
-        date: {
-          type: 'string',
-          description: 'Target date in YYYY-MM-DD format.',
-        },
-        taskId: {
-          type: 'string',
-          description: 'Exact task ID or task title snippet to toggle.',
-        },
-        completed: {
-          type: 'boolean',
-          description: 'True to mark completed, false to unmark (default true).',
-        },
-      },
-      required: ['date', 'taskId'],
-    },
-  },
-  {
-    name: 'get_habit_analytics',
-    description: 'Analyzes micro-habit consistency, completion rates per habit, current streak, and logging trends.',
-    inputSchema: {
-      type: 'object',
-      properties: {},
-    },
-  },
-  {
-    name: 'get_weekly_report',
-    description: 'Provides a week-by-week progress summary, comparing planned study hours vs completed hours and pacing recommendations.',
-    inputSchema: {
-      type: 'object',
-      properties: {
-        week: {
-          type: 'number',
-          description: 'Week number between 1 and 9 (defaults to current week).',
-        },
-      },
-    },
-  },
-];
+// Helper to fetch completion sets from Supabase
+async function getCompletionsData() {
+  const completedDates = new Set();
+  const completedTaskIds = new Set();
+  let records = [];
+
+  if (supabase) {
+    try {
+      const { data } = await supabase.from('daily_completions').select('*').order('date', { ascending: true });
+      if (data) {
+        records = data;
+        data.forEach((row) => {
+          if (row.task_completions && row.task_completions.length > 0) {
+            completedDates.add(row.date);
+            row.task_completions.forEach((id) => completedTaskIds.add(id));
+          }
+        });
+      }
+    } catch (e) {}
+  }
+  return { completedDates, completedTaskIds, records };
+}
 
 // ============================================================================
-// 4. MCP Tool Execution Handlers
+// 3. Create McpServer Instance & Register Tools
 // ============================================================================
-async function handleToolCall(name, args) {
-  const todayStr = getTodayString();
-  const currentDayNum = Math.min(61, Math.max(1, getDayNumber(todayStr)));
+const mcpServer = new McpServer({
+  name: 'de60-study-tracker',
+  version: '2.1.0',
+});
 
-  // 1. Tool: get_study_status
-  if (name === 'get_study_status') {
-    let completedDates = new Set();
-    let completedTaskIds = new Set();
-
-    if (supabase) {
-      try {
-        const { data } = await supabase.from('daily_completions').select('*');
-        if (data) {
-          data.forEach((row) => {
-            if (row.task_completions && row.task_completions.length > 0) {
-              completedDates.add(row.date);
-              row.task_completions.forEach((id) => completedTaskIds.add(id));
-            }
-          });
-        }
-      } catch (err) {}
-    }
+// Tool 1: get_study_status
+mcpServer.tool(
+  'get_study_status',
+  'Returns overall progress, active streak, and detects if and when you fell off track, identifying the earliest missed date and overdue backlog hours.',
+  {},
+  async () => {
+    const todayStr = getTodayString();
+    const currentDayNum = Math.min(61, Math.max(1, getDayNumber(todayStr)));
+    const { completedTaskIds } = await getCompletionsData();
 
     const dayMap = {};
     curriculumTasks.forEach((t) => {
@@ -248,8 +166,7 @@ async function handleToolCall(name, args) {
     });
 
     const firstMissed = missedDays[0] || null;
-
-    return {
+    const result = {
       today: todayStr,
       currentPlanDay: currentDayNum,
       totalCurriculumTasks: curriculumTasks.length,
@@ -275,65 +192,108 @@ async function handleToolCall(name, args) {
       })),
       cloudSyncStatus: supabase ? 'Connected (Supabase PostgreSQL)' : 'Offline Local Mode',
     };
+
+    return { content: [{ type: 'text', text: JSON.stringify(result, null, 2) }] };
   }
+);
 
-  // 2. Tool: get_catchup_plan
-  if (name === 'get_catchup_plan') {
-    const extraDailyHours = args.max_daily_extra_hours || 1.5;
-    const status = await handleToolCall('get_study_status', {});
+// Tool 2: get_catchup_plan
+mcpServer.tool(
+  'get_catchup_plan',
+  'Generates an actionable, prioritized catch-up schedule to recover missed days based on extra hours you can commit per day.',
+  {
+    max_daily_extra_hours: z.number().optional().describe('Maximum extra study hours per day you can allocate for catch-up (default 1.5).'),
+  },
+  async ({ max_daily_extra_hours }) => {
+    const extraDailyHours = max_daily_extra_hours || 1.5;
+    const todayStr = getTodayString();
+    const currentDayNum = Math.min(61, Math.max(1, getDayNumber(todayStr)));
+    const { completedTaskIds } = await getCompletionsData();
 
-    if (!status.isBehindSchedule) {
+    const overdueTasks = curriculumTasks.filter((t) => t.date < todayStr && !completedTaskIds.has(t.id));
+    if (overdueTasks.length === 0) {
       return {
-        status: 'ON_TRACK',
-        message: `Congratulations! You are on pace with Day ${currentDayNum}. Zero overdue backlog.`,
+        content: [{
+          type: 'text',
+          text: JSON.stringify({
+            status: 'ON_TRACK',
+            message: `Congratulations! You are on pace with Day ${currentDayNum}. Zero overdue backlog.`,
+          }, null, 2),
+        }],
       };
     }
 
-    const totalBacklogHours = status.backlogSummary.estimatedBacklogHours;
+    const totalBacklogMinutes = overdueTasks.reduce((s, t) => s + (t.durationMinutes || 60), 0);
+    const totalBacklogHours = Math.round(totalBacklogMinutes / 60);
     const daysNeeded = Math.ceil(totalBacklogHours / extraDailyHours);
+    const firstMissedDate = overdueTasks[0].date;
 
-    return {
+    const result = {
       status: 'CATCHUP_REQUIRED',
-      missedSinceDay: status.missedSince.dayNumber,
-      totalBacklogTasks: status.backlogSummary.overdueTasksCount,
+      missedSinceDay: getDayNumber(firstMissedDate),
+      totalBacklogTasks: overdueTasks.length,
       totalBacklogHours,
       recommendedStrategy: `Allocate ${extraDailyHours} extra hours/day. You will be fully caught up in ${daysNeeded} days.`,
-      catchupOrder: status.urgentPriorityTasks,
-      action: `Start by opening Day ${status.missedSince.dayNumber} in your habit tracker.`,
+      catchupOrder: overdueTasks.slice(0, 3).map((t) => ({
+        day: getDayNumber(t.date),
+        date: t.date,
+        taskId: t.id,
+        title: t.title,
+        durationMinutes: t.durationMinutes,
+      })),
+      action: `Start by opening Day ${getDayNumber(firstMissedDate)} in your habit tracker.`,
     };
-  }
 
-  // 3. Tool: get_daily_curriculum
-  if (name === 'get_daily_curriculum') {
-    let targetDate = args.date;
-    if (!targetDate && args.day) {
+    return { content: [{ type: 'text', text: JSON.stringify(result, null, 2) }] };
+  }
+);
+
+// Tool 3: get_daily_curriculum
+mcpServer.tool(
+  'get_daily_curriculum',
+  'Fetches syllabus tasks, durations, and instructions for any specific plan day (1–61) or date (YYYY-MM-DD).',
+  {
+    day: z.number().optional().describe('Plan day number between 1 and 61 (e.g. 17).'),
+    date: z.string().optional().describe('Target date in YYYY-MM-DD format (e.g. 2026-11-17).'),
+  },
+  async ({ day, date }) => {
+    let targetDate = date;
+    if (!targetDate && day) {
       const start = new Date(2026, 10, 1, 12, 0, 0);
-      start.setDate(start.getDate() + (args.day - 1));
+      start.setDate(start.getDate() + (day - 1));
       const y = start.getFullYear();
       const m = String(start.getMonth() + 1).padStart(2, '0');
       const d = String(start.getDate()).padStart(2, '0');
       targetDate = `${y}-${m}-${d}`;
     }
-    if (!targetDate) targetDate = todayStr;
+    if (!targetDate) targetDate = getTodayString();
 
     const matched = curriculumTasks.filter((t) => t.date === targetDate);
-    return {
+    const result = {
       date: targetDate,
       dayNumber: getDayNumber(targetDate),
       tasksCount: matched.length,
       tasks: matched,
     };
-  }
 
-  // 4. Tool: generate_study_notes
-  if (name === 'generate_study_notes') {
-    const targetDate = args.date || todayStr;
+    return { content: [{ type: 'text', text: JSON.stringify(result, null, 2) }] };
+  }
+);
+
+// Tool 4: generate_study_notes
+mcpServer.tool(
+  'generate_study_notes',
+  'Generates genuine, topic-specific technical study notes (Concepts, Failure Modes, Architecture, and Interview Q&A) for a study day.',
+  {
+    date: z.string().optional().describe('Target date in YYYY-MM-DD format (defaults to today).'),
+  },
+  async ({ date }) => {
+    const targetDate = date || getTodayString();
     const dayNum = getDayNumber(targetDate);
     const dayTasks = curriculumTasks.filter((t) => t.date === targetDate);
     const mainTopic = dayTasks[0]?.title || `GCP Data Engineering Day ${dayNum}`;
     const cleanTopic = mainTopic.replace(/^(Learn|Hands-on):\s*(\[Core\]\s*)?/i, '');
 
-    // Tailor concepts and failure modes realistically to topic keywords
     let concepts = [
       `Architectural Design Principles: Separation of storage and compute in Google Cloud.`,
       `State Management & Checkpointing: Ensuring consistent processing state and deterministic recovery.`,
@@ -409,7 +369,6 @@ async function handleToolCall(name, args) {
       interviewQA,
     };
 
-    // Save Markdown file locally
     const notesDir = path.join(__dirname, '../notes');
     if (!fs.existsSync(notesDir)) fs.mkdirSync(notesDir, { recursive: true });
     const mdPath = path.join(notesDir, `${targetDate}.md`);
@@ -431,89 +390,100 @@ async function handleToolCall(name, args) {
       } catch (err) {}
     }
 
-    return {
+    const result = {
       success: true,
       savedFile: `notes/${targetDate}.md`,
       cloudSynced: Boolean(supabase),
       note: noteRecord,
     };
+
+    return { content: [{ type: 'text', text: JSON.stringify(result, null, 2) }] };
   }
+);
 
-  // 5. Tool: mark_task_completed (Strict Write Safety & Validation)
-  if (name === 'mark_task_completed') {
-    const targetDate = args.date;
-    const requestedTaskId = args.taskId;
-    const completed = args.completed !== false;
-
-    if (!targetDate || !/^\d{4}-\d{2}-\d{2}$/.test(targetDate)) {
+// Tool 5: mark_task_completed (Strict Write Safety & Validation)
+mcpServer.tool(
+  'mark_task_completed',
+  'Safely marks a study task completed or uncompleted with strict validation against curriculum IDs, updating Supabase cloud records.',
+  {
+    date: z.string().describe('Target date in YYYY-MM-DD format.'),
+    taskId: z.string().describe('Exact task ID or task title snippet to toggle.'),
+    completed: z.boolean().optional().describe('True to mark completed, false to unmark (default true).'),
+  },
+  async ({ date, taskId, completed }) => {
+    if (!date || !/^\d{4}-\d{2}-\d{2}$/.test(date)) {
       throw new Error(`Invalid or missing "date". Format must be YYYY-MM-DD.`);
     }
 
-    if (!requestedTaskId || typeof requestedTaskId !== 'string' || requestedTaskId.trim() === '') {
+    if (!taskId || typeof taskId !== 'string' || taskId.trim() === '') {
       throw new Error(`Missing "taskId". You must specify the ID or title of the task to mark.`);
     }
 
-    // Match task on target date
-    const dayTasks = curriculumTasks.filter((t) => t.date === targetDate);
+    const isCompleted = completed !== false;
+    const dayTasks = curriculumTasks.filter((t) => t.date === date);
     const matchedTask = dayTasks.find(
-      (t) => t.id === requestedTaskId || t.title.toLowerCase().includes(requestedTaskId.toLowerCase())
+      (t) => t.id === taskId || t.title.toLowerCase().includes(taskId.toLowerCase())
     );
 
     if (!matchedTask) {
       const available = dayTasks.map((t) => `"${t.id}" (${t.title})`).join(', ');
       throw new Error(
-        `Task "${requestedTaskId}" not found for date ${targetDate}. Available tasks on this date: ${available || 'None found.'}`
+        `Task "${taskId}" not found for date ${date}. Available tasks on this date: ${available || 'None found.'}`
       );
     }
 
     const actualTaskId = matchedTask.id;
 
     if (supabase) {
-      const { data } = await supabase.from('daily_completions').select('*').eq('date', targetDate).maybeSingle();
-      const existing = data || { date: targetDate, task_completions: [] };
+      const { data } = await supabase.from('daily_completions').select('*').eq('date', date).maybeSingle();
+      const existing = data || { date, task_completions: [] };
       const tasksSet = new Set(existing.task_completions || []);
 
-      if (completed) tasksSet.add(actualTaskId);
+      if (isCompleted) tasksSet.add(actualTaskId);
       else tasksSet.delete(actualTaskId);
 
       await supabase.from('daily_completions').upsert({
-        date: targetDate,
+        date,
         task_completions: Array.from(tasksSet),
         updated_at: new Date().toISOString(),
       }, { onConflict: 'date' });
 
-      return {
+      const result = {
         success: true,
-        action: completed ? 'TASK_MARKED_COMPLETED' : 'TASK_MARKED_UNCOMPLETED',
-        date: targetDate,
+        action: isCompleted ? 'TASK_MARKED_COMPLETED' : 'TASK_MARKED_UNCOMPLETED',
+        date,
         taskId: actualTaskId,
         taskTitle: matchedTask.title,
         completedTasksOnDay: Array.from(tasksSet).length,
         totalTasksOnDay: dayTasks.length,
         dayProgress: `${Array.from(tasksSet).length} / ${dayTasks.length} tasks completed`,
       };
+      return { content: [{ type: 'text', text: JSON.stringify(result, null, 2) }] };
     }
 
-    return {
+    const result = {
       success: true,
-      action: completed ? 'TASK_MARKED_COMPLETED' : 'TASK_MARKED_UNCOMPLETED',
-      date: targetDate,
+      action: isCompleted ? 'TASK_MARKED_COMPLETED' : 'TASK_MARKED_UNCOMPLETED',
+      date,
       taskId: actualTaskId,
       taskTitle: matchedTask.title,
       note: 'Updated locally (offline mode). Connect Supabase to persist in cloud.',
     };
+    return { content: [{ type: 'text', text: JSON.stringify(result, null, 2) }] };
   }
+);
 
-  // 6. Tool: get_habit_analytics
-  if (name === 'get_habit_analytics') {
-    let records = [];
-    if (supabase) {
-      try {
-        const { data } = await supabase.from('daily_completions').select('*').order('date', { ascending: true });
-        records = data || [];
-      } catch (e) {}
-    }
+// Tool 6: get_habit_analytics (Calculates actual active & longest streak)
+mcpServer.tool(
+  'get_habit_analytics',
+  'Analyzes micro-habit consistency, completion rates per habit, current active streak, and logging trends.',
+  {},
+  async () => {
+    const todayStr = getTodayString();
+    const currentDayNum = Math.min(61, Math.max(1, getDayNumber(todayStr)));
+    const { records } = await getCompletionsData();
 
+    // Group habits completion counts
     const habitTotals = {
       'Study GCP Concepts': 0,
       'Hands-on Practice': 0,
@@ -528,12 +498,61 @@ async function handleToolCall(name, args) {
       });
     });
 
+    // Compute actual current streak
+    const activeDates = new Set(
+      records
+        .filter((r) => (r.task_completions && r.task_completions.length > 0) || Object.values(r.habit_completions || {}).some(v => v > 0))
+        .map((r) => r.date)
+    );
+
+    let currentStreak = 0;
+    let checkDate = new Date();
+    let checkStr = todayStr;
+
+    // If today hasn't been logged yet, check starting from yesterday
+    if (!activeDates.has(checkStr)) {
+      const yesterday = new Date();
+      yesterday.setDate(yesterday.getDate() - 1);
+      checkStr = `${yesterday.getFullYear()}-${String(yesterday.getMonth() + 1).padStart(2, '0')}-${String(yesterday.getDate()).padStart(2, '0')}`;
+    }
+
+    while (activeDates.has(checkStr)) {
+      currentStreak += 1;
+      const d = new Date(checkStr);
+      d.setDate(d.getDate() - 1);
+      checkStr = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+    }
+
+    // Compute longest historical streak
+    const sortedDates = Array.from(activeDates).sort();
+    let longestStreak = 0;
+    let tempStreak = 0;
+    let prevTimestamp = null;
+
+    sortedDates.forEach((dStr) => {
+      const t = new Date(dStr).getTime();
+      if (prevTimestamp === null) {
+        tempStreak = 1;
+      } else {
+        const diffDays = Math.round((t - prevTimestamp) / (1000 * 60 * 60 * 24));
+        if (diffDays === 1) {
+          tempStreak += 1;
+        } else if (diffDays > 1) {
+          tempStreak = 1;
+        }
+      }
+      if (tempStreak > longestStreak) longestStreak = tempStreak;
+      prevTimestamp = t;
+    });
+
     const activeDaysCount = records.length;
     const consistencyRate = Math.min(100, Math.round((activeDaysCount / Math.max(1, currentDayNum)) * 100));
 
-    return {
+    const result = {
       trackedDays: activeDaysCount,
       currentPlanDay: currentDayNum,
+      currentActiveStreakDays: currentStreak,
+      longestStreakDays: longestStreak,
       consistencyRatePercent: consistencyRate,
       habitPerformance: Object.entries(habitTotals).map(([name, count]) => ({
         habit: name,
@@ -541,201 +560,147 @@ async function handleToolCall(name, args) {
         consistencyPercent: activeDaysCount > 0 ? Math.round((count / activeDaysCount) * 100) : 0,
       })),
     };
-  }
 
-  // 7. Tool: get_weekly_report
-  if (name === 'get_weekly_report') {
-    const targetWeek = args.week || Math.min(9, Math.ceil(currentDayNum / 7));
+    return { content: [{ type: 'text', text: JSON.stringify(result, null, 2) }] };
+  }
+);
+
+// Tool 7: get_weekly_report (Compares Planned vs Completed Hours)
+mcpServer.tool(
+  'get_weekly_report',
+  'Provides a week-by-week progress summary, comparing planned study hours vs actual completed hours, pending milestones, and pacing recommendations.',
+  {
+    week: z.number().optional().describe('Week number between 1 and 9 (defaults to current week).'),
+  },
+  async ({ week }) => {
+    const todayStr = getTodayString();
+    const currentDayNum = Math.min(61, Math.max(1, getDayNumber(todayStr)));
+    const targetWeek = week || Math.min(9, Math.ceil(currentDayNum / 7));
     const startDay = (targetWeek - 1) * 7 + 1;
     const endDay = Math.min(61, targetWeek * 7);
 
-    // Filter tasks belonging to this week
+    const { completedTaskIds } = await getCompletionsData();
+
     const weekTasks = curriculumTasks.filter((t) => {
       const day = getDayNumber(t.date);
       return day >= startDay && day <= endDay;
     });
 
-    const totalHours = Math.round(weekTasks.reduce((s, t) => s + (t.durationMinutes || 60), 0) / 60);
+    const plannedMinutes = weekTasks.reduce((s, t) => s + (t.durationMinutes || 60), 0);
+    const plannedHours = Math.round((plannedMinutes / 60) * 10) / 10;
 
-    return {
+    const completedWeekTasks = weekTasks.filter((t) => completedTaskIds.has(t.id));
+    const completedMinutes = completedWeekTasks.reduce((s, t) => s + (t.durationMinutes || 60), 0);
+    const completedHours = Math.round((completedMinutes / 60) * 10) / 10;
+
+    const remainingHours = Math.max(0, Math.round((plannedHours - completedHours) * 10) / 10);
+    const weekCompletionPercentage = weekTasks.length > 0 ? Math.round((completedWeekTasks.length / weekTasks.length) * 100) : 0;
+
+    const result = {
       weekNumber: targetWeek,
       planDayRange: `Day ${startDay} – Day ${endDay}`,
       totalTasksCount: weekTasks.length,
-      estimatedHours: totalHours,
+      completedTasksCount: completedWeekTasks.length,
+      weekCompletionPercentage,
+      plannedHours,
+      completedHours,
+      remainingHours,
       keyMilestones: weekTasks.slice(0, 4).map((t) => ({ day: getDayNumber(t.date), title: t.title })),
-      recommendation: targetWeek < Math.ceil(currentDayNum / 7)
-        ? 'This week is in the past. Use get_catchup_plan if any tasks are incomplete.'
-        : 'Stay consistent with daily hands-on labs and revise flashcards daily.',
+      pacingStatus: completedHours >= plannedHours
+        ? 'WEEK_GOAL_ACHIEVED'
+        : targetWeek < Math.ceil(currentDayNum / 7)
+          ? 'BEHIND_WEEK_PACE'
+          : 'IN_PROGRESS',
+      recommendation: targetWeek < Math.ceil(currentDayNum / 7) && remainingHours > 0
+        ? `You have ${remainingHours} hours remaining from Week ${targetWeek}. Use get_catchup_plan to schedule catch-up sessions.`
+        : `Stay consistent with daily hands-on labs and review flashcards daily.`,
     };
-  }
 
-  throw new Error(`Unknown tool: ${name}`);
-}
+    return { content: [{ type: 'text', text: JSON.stringify(result, null, 2) }] };
+  }
+);
 
 // ============================================================================
-// 5. Server Dispatcher (Shared by both STDIO and HTTP)
-// ============================================================================
-async function processJsonRpc(req) {
-  if (req.method === 'initialize') {
-    return {
-      jsonrpc: '2.0',
-      id: req.id,
-      result: {
-        protocolVersion: '2024-11-05',
-        capabilities: { tools: {} },
-        serverInfo: {
-          name: 'de60-study-tracker',
-          version: '2.0.0',
-        },
-      },
-    };
-  }
-
-  if (req.method === 'notifications/initialized') {
-    return null;
-  }
-
-  if (req.method === 'ping') {
-    return { jsonrpc: '2.0', id: req.id, result: {} };
-  }
-
-  if (req.method === 'tools/list') {
-    return {
-      jsonrpc: '2.0',
-      id: req.id,
-      result: { tools: TOOLS },
-    };
-  }
-
-  if (req.method === 'tools/call') {
-    const { name, arguments: args } = req.params || {};
-    const resultData = await handleToolCall(name, args || {});
-    return {
-      jsonrpc: '2.0',
-      id: req.id,
-      result: {
-        content: [
-          {
-            type: 'text',
-            text: JSON.stringify(resultData, null, 2),
-          },
-        ],
-      },
-    };
-  }
-
-  return {
-    jsonrpc: '2.0',
-    id: req.id,
-    error: { code: -32601, message: `Method "${req.method}" not found.` },
-  };
-}
-
-// ============================================================================
-// 6. Transport Execution: Dual STDIO + Streamable HTTP / SSE
+// 4. Execution Mode: STDIO vs Official Streamable HTTP / SSE Server
 // ============================================================================
 const isHttpMode = process.env.PORT || process.argv.includes('--http');
 
 if (isHttpMode) {
   const PORT = process.env.PORT || 8080;
+  const app = express();
 
-  const server = http.createServer(async (req, res) => {
-    // CORS Headers
-    res.setHeader('Access-Control-Allow-Origin', '*');
-    res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
-    res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization, x-api-key');
+  app.use(cors());
 
-    if (req.method === 'OPTIONS') {
-      res.writeHead(204);
-      return res.end();
-    }
-
-    // Optional Bearer Authentication check
-    if (mcpSecretKey) {
+  // Optional Bearer Authentication middleware
+  if (mcpSecretKey) {
+    app.use((req, res, next) => {
+      // Allow unauthenticated health check
+      if (req.method === 'GET' && (req.path === '/' || req.path === '/health')) {
+        return next();
+      }
       const auth = req.headers['authorization'] || req.headers['x-api-key'] || '';
       const token = auth.replace(/^Bearer\s+/i, '');
       if (token !== mcpSecretKey) {
-        res.writeHead(401, { 'Content-Type': 'application/json' });
-        return res.end(JSON.stringify({ error: 'Unauthorized: Invalid or missing MCP_SECRET_KEY.' }));
+        return res.status(401).json({ error: 'Unauthorized: Invalid or missing MCP_SECRET_KEY.' });
       }
-    }
+      next();
+    });
+  }
 
-    // Health Check Endpoint
-    if (req.method === 'GET' && (req.url === '/' || req.url === '/health')) {
-      res.writeHead(200, { 'Content-Type': 'application/json' });
-      return res.end(JSON.stringify({
-        status: 'ok',
-        service: 'de60-habit-tracker-mcp',
-        version: '2.0.0',
-        toolsCount: TOOLS.length,
-        curriculumTasksLoaded: curriculumTasks.length,
-      }));
-    }
-
-    // SSE Handshake for Remote Clients
-    if (req.method === 'GET' && req.url === '/sse') {
-      res.writeHead(200, {
-        'Content-Type': 'text/event-stream',
-        'Cache-Control': 'no-cache',
-        'Connection': 'keep-alive',
-      });
-      res.write(`event: endpoint\ndata: /mcp\n\n`);
-      return;
-    }
-
-    // JSON-RPC Endpoint (POST /mcp or POST /)
-    if (req.method === 'POST') {
-      let body = '';
-      req.on('data', (chunk) => { body += chunk; });
-      req.on('end', async () => {
-        try {
-          const jsonReq = JSON.parse(body);
-          const response = await processJsonRpc(jsonReq);
-          res.writeHead(200, { 'Content-Type': 'application/json' });
-          res.end(JSON.stringify(response));
-        } catch (err) {
-          res.writeHead(500, { 'Content-Type': 'application/json' });
-          res.end(JSON.stringify({
-            jsonrpc: '2.0',
-            id: null,
-            error: { code: -32603, message: err.message },
-          }));
-        }
-      });
-      return;
-    }
-
-    res.writeHead(404, { 'Content-Type': 'application/json' });
-    res.end(JSON.stringify({ error: 'Not found' }));
+  // Health check endpoint
+  app.get(['/', '/health'], (req, res) => {
+    res.json({
+      status: 'ok',
+      service: 'de60-habit-tracker-mcp',
+      version: '2.1.0',
+      transport: 'Streamable HTTP / SSE',
+      endpoints: {
+        sse: '/sse',
+        messages: '/messages',
+      },
+      toolsCount: 7,
+      curriculumTasksLoaded: curriculumTasks.length,
+    });
   });
 
-  server.listen(PORT, () => {
-    console.log(`[DE60 MCP] Remote HTTP Server listening on port ${PORT}`);
-    console.log(`[DE60 MCP] Endpoints: GET /health | GET /sse | POST /mcp`);
+  // Active SSE transports mapped by sessionId
+  const transports = new Map();
+
+  // Official SSE Stream Endpoint
+  app.get('/sse', async (req, res) => {
+    const transport = new SSEServerTransport('/messages', res);
+    transports.set(transport.sessionId, transport);
+
+    transport.onclose = () => {
+      transports.delete(transport.sessionId);
+    };
+
+    await mcpServer.connect(transport);
+  });
+
+  // Official Message Post Endpoint
+  app.post('/messages', async (req, res) => {
+    const sessionId = req.query.sessionId;
+    const transport = transports.get(sessionId);
+    if (!transport) {
+      return res.status(404).send('Session not found or connection closed');
+    }
+    await transport.handlePostMessage(req, res);
+  });
+
+  app.listen(PORT, () => {
+    console.log(`[DE60 MCP] Official SDK Streamable HTTP / SSE Server running on port ${PORT}`);
+    console.log(`[DE60 MCP] Endpoints: GET /health | GET /sse | POST /messages`);
   });
 
 } else {
   // STDIO Transport Loop (Claude Desktop, Cursor, Antigravity CLI)
-  const rl = readline.createInterface({
-    input: process.stdin,
-    output: process.stdout,
-    terminal: false,
-  });
-
-  rl.on('line', async (line) => {
-    if (!line.trim()) return;
-    try {
-      const req = JSON.parse(line);
-      const res = await processJsonRpc(req);
-      if (res) {
-        process.stdout.write(JSON.stringify(res) + '\n');
-      }
-    } catch (err) {
-      process.stdout.write(JSON.stringify({
-        jsonrpc: '2.0',
-        id: null,
-        error: { code: -32603, message: err.message },
-      }) + '\n');
-    }
+  async function runStdio() {
+    const transport = new StdioServerTransport();
+    await mcpServer.connect(transport);
+  }
+  runStdio().catch((err) => {
+    console.error('Fatal MCP STDIO Error:', err);
+    process.exit(1);
   });
 }
