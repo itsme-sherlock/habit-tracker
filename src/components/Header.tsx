@@ -7,9 +7,10 @@ import { getDayNumber, formatFriendlyDate, getNextDate, getPrevDate, getTodayDat
 interface HeaderProps {
   currentDate: string;
   onSelectDate: (date: string) => void;
+  onOpenCalendar?: () => void;
 }
 
-export const Header: React.FC<HeaderProps> = ({ currentDate, onSelectDate }) => {
+export const Header: React.FC<HeaderProps> = ({ currentDate, onSelectDate, onOpenCalendar }) => {
   const dayNum = getDayNumber(currentDate);
   const isToday = currentDate === getTodayDateString();
 
@@ -45,12 +46,19 @@ export const Header: React.FC<HeaderProps> = ({ currentDate, onSelectDate }) => 
           <Ionicons name="chevron-back" size={20} color={colors.fgPrimary} />
         </TouchableOpacity>
 
-        <View style={styles.dateCenter}>
-          <Text style={styles.dayLabel}>
-            {dayNum > 0 && dayNum <= 61 ? `DAY ${dayNum} OF 61` : `PLAN SCHEDULE`}
-          </Text>
+        <TouchableOpacity
+          style={styles.dateCenterBtn}
+          onPress={onOpenCalendar}
+          activeOpacity={0.7}
+        >
+          <View style={styles.dateCenterRow}>
+            <Ionicons name="calendar-outline" size={13} color={colors.accentFlow} />
+            <Text style={styles.dayLabel}>
+              {dayNum > 0 && dayNum <= 61 ? `DAY ${dayNum} OF 61` : `PLAN SCHEDULE`}
+            </Text>
+          </View>
           <Text style={styles.dateString}>{formatFriendlyDate(currentDate)}</Text>
-        </View>
+        </TouchableOpacity>
 
         <TouchableOpacity
           style={styles.navArrow}
@@ -142,8 +150,19 @@ const styles = StyleSheet.create({
     borderRadius: 6,
     backgroundColor: colors.bgSurface,
   },
-  dateCenter: {
+  dateCenterBtn: {
     alignItems: 'center',
+    paddingVertical: 2,
+    paddingHorizontal: 8,
+    borderRadius: 8,
+    backgroundColor: 'rgba(0, 212, 170, 0.06)',
+    borderWidth: 1,
+    borderColor: 'rgba(0, 212, 170, 0.2)',
+  },
+  dateCenterRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 5,
   },
   dayLabel: {
     color: colors.accentFlow,

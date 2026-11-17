@@ -1,4 +1,4 @@
-import React, { useRef, useMemo } from 'react';
+import React, { useRef, useMemo, useState } from 'react';
 import {
   View,
   Text,
@@ -18,6 +18,8 @@ import { TaskCard } from '../components/TaskCard';
 import { HabitSection } from '../components/HabitSection';
 import { DayReflection } from '../components/DayReflection';
 import { AIStudyNotesCard } from '../components/AIStudyNotesCard';
+import { CalendarModal } from '../components/CalendarModal';
+import { CatchupRadarCard } from '../components/CatchupRadarCard';
 import { getPrevDate, getNextDate, getDayNumber } from '../utils/date';
 import { getTaskCompletedEffort } from '../utils/submodules';
 
@@ -54,6 +56,7 @@ export const TodayScreen: React.FC<TodayScreenProps> = ({
 }) => {
   const completedAllTasksCount = allTasks.filter((t) => t.completed).length;
   const todayTasksCompletedCount = tasks.filter((t) => t.completed).length;
+  const [calendarVisible, setCalendarVisible] = useState<boolean>(false);
 
   // Calculate effort in minutes based on tasks and submodules
   const totalEffortMinutes = tasks.reduce((sum, t) => sum + (t.durationMinutes || 0), 0);
@@ -186,7 +189,11 @@ export const TodayScreen: React.FC<TodayScreenProps> = ({
 
   return (
     <View style={styles.container}>
-      <Header currentDate={currentDate} onSelectDate={onSelectDate} />
+      <Header
+        currentDate={currentDate}
+        onSelectDate={onSelectDate}
+        onOpenCalendar={() => setCalendarVisible(true)}
+      />
 
       {/* Interactive Navigation Bar with Directional Buttons */}
       <View style={styles.navActionBar}>
@@ -199,9 +206,14 @@ export const TodayScreen: React.FC<TodayScreenProps> = ({
           <Text style={styles.navActionText}>Prev Day</Text>
         </TouchableOpacity>
 
-        <View style={styles.navCenterBadge}>
+        <TouchableOpacity
+          style={styles.navCenterBadge}
+          onPress={() => setCalendarVisible(true)}
+          activeOpacity={0.7}
+        >
+          <Ionicons name="calendar-outline" size={12} color={colors.accentFlow} style={{ marginRight: 4 }} />
           <Text style={styles.navCenterText}>DAY {currentDayNum} OF 61</Text>
-        </View>
+        </TouchableOpacity>
 
         <TouchableOpacity
           style={styles.navActionBtn}
@@ -240,6 +252,13 @@ export const TodayScreen: React.FC<TodayScreenProps> = ({
             todayEffortTotalMinutes={totalEffortMinutes}
             streakDays={streakDays}
             totalStudyHours={totalStudyHours}
+          />
+
+          {/* Catch-Up Radar & Backlog Tracker */}
+          <CatchupRadarCard
+            currentDate={currentDate}
+            allTasks={allTasks}
+            onSelectDate={onSelectDate}
           />
 
           {/* AI Study Notes & 4-YoE Interview Prep Card */}
@@ -298,6 +317,16 @@ export const TodayScreen: React.FC<TodayScreenProps> = ({
           />
         </ScrollView>
       </Animated.View>
+
+      {/* Calendar Picker Modal */}
+      <CalendarModal
+        visible={calendarVisible}
+        onClose={() => setCalendarVisible(false)}
+        currentDate={currentDate}
+        onSelectDate={onSelectDate}
+        allTasks={allTasks}
+        completions={completion ? { [currentDate]: completion } : {}}
+      />
     </View>
   );
 };
@@ -334,6 +363,8 @@ const styles = StyleSheet.create({
     fontWeight: '700',
   },
   navCenterBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
     backgroundColor: colors.bgDeep,
     paddingHorizontal: 10,
     paddingVertical: 4,

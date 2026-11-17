@@ -60,8 +60,53 @@ Designed with the **"Midnight Pipeline"** technical aesthetic (`#0B1220` deep da
 - **Throughput by Category:** Visual progress meters for Learn, Hands-on, and Review drills.
 - **Total Hours & Remaining Tasks:** High-level metrics tracking overall effort.
 
-### 4. Settings & Storage Management (`Settings`)
+### 4. Interactive Calendar Modal & Quick Navigation
+- **Calendar Picker:** Tap the date button or the `DAY X OF 61` badge in the top navigation bar to open a full month calendar.
+- **Visual Status Badges:**
+  - 🟢 **Green:** Day fully completed.
+  - 🟡 **Accent Yellow:** Currently selected date.
+  - 🔴 **Red Outline:** Missed/overdue past date.
+  - 🔵 **Cyan Border:** Today's date.
+- **60-Day Badges:** Every date inside the study plan has a badge (`D1`–`D61`).
+- **Quick Actions:** One-tap **"Catch Up: Day X"** button jumps directly to your first missed day; **"Jump to Today"** brings you right back.
+
+### 5. Catch-Up Radar & Backlog Tracker
+- Automatically computes if you are behind schedule.
+- Precisely identifies:
+  - When you fell off track (e.g. *Day 1, Nov 1, 2026*).
+  - Total overdue incomplete tasks across all missed days.
+- Provides a one-tap **"Jump to Day X to Catch Up"** action.
+- Shows **"Pace On Track • No overdue backlog"** when caught up.
+
+### 6. Model Context Protocol (MCP) Server
+Integrates your study tracker with any AI application (Antigravity, Claude Desktop, Cursor, Copilot, etc.) so AI agents can monitor your progress, tell you what you missed, generate technical study notes, and sync completions to Supabase.
+
+#### Available MCP Tools:
+1. `get_study_status`: Progress %, streak, exact missed date (`missedSince`), backlog hours, and priority tasks.
+2. `get_catchup_plan`: Actionable catch-up roadmap with daily extra hours calculation.
+3. `get_daily_curriculum`: Full tasks, subtasks, descriptions for any day (1..61) or date.
+4. `generate_study_notes`: Produces 4-YoE study notes and saves to `notes/YYYY-MM-DD.md` + Supabase.
+5. `mark_task_completed`: Updates task completion in Supabase and syncs to your phone.
+
+#### Connecting MCP to Claude Desktop or Cursor:
+Add to your `claude_desktop_config.json` or Cursor MCP settings:
+```json
+{
+  "mcpServers": {
+    "de60-habit-tracker": {
+      "command": "node",
+      "args": ["C:\\Users\\PC\\.gemini\\antigravity\\scratch\\de60-habit-tracker\\scripts\\mcp-server.js"],
+      "env": {
+        "SUPABASE_URL": "https://uxbmfsbqpqlrsftmdyfl.supabase.co",
+        "SUPABASE_ANON_KEY": "sb_publishable_r5UaMPSlVgOC37a7L5wotA_WWz7l9wB"
+      }
+    }
+  }
+}
+```
+
+### 7. Settings & Storage Management (`Settings`)
 - **Curriculum Details:** Start date (`Nov 1, 2026`), target completion date (`Dec 31, 2026`), pace (`3 tasks/day`).
 - **Demo Progress Seeder:** One-tap button to pre-fill Days 1–15 as completed so you can immediately preview streaks, heatmap cells, and analytics.
 - **Data Reset:** Restore the app back to initial Day 1 state anytime.
-- **Offline Persistence:** All state is saved locally via `@react-native-async-storage/async-storage`.
+- **Offline Persistence & Cloud Sync:** Local persistence via `@react-native-async-storage/async-storage` and bidirectional cloud sync with Supabase PostgreSQL.
