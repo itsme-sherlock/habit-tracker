@@ -18,8 +18,22 @@ const { StdioServerTransport } = require('@modelcontextprotocol/sdk/server/stdio
 const { SSEServerTransport } = require('@modelcontextprotocol/sdk/server/sse.js');
 
 // ============================================================================
-// 1. Supabase Client & Config Initialization
+// 1. Supabase Client & Config Initialization (with WebSocket Polyfill for Node 20+)
 // ============================================================================
+if (typeof global.WebSocket === 'undefined') {
+  try {
+    global.WebSocket = require('ws');
+  } catch (e) {
+    global.WebSocket = class DummyWebSocket {
+      constructor() {}
+      addEventListener() {}
+      removeEventListener() {}
+      send() {}
+      close() {}
+    };
+  }
+}
+
 let createClient;
 try {
   createClient = require('@supabase/supabase-js').createClient;
@@ -42,7 +56,13 @@ try {
 
 let supabase = null;
 if (createClient && supabaseUrl && supabaseKey && supabaseUrl.startsWith('https://')) {
-  supabase = createClient(supabaseUrl, supabaseKey);
+  try {
+    supabase = createClient(supabaseUrl, supabaseKey, {
+      auth: { persistSession: false },
+    });
+  } catch (err) {
+    console.error('Failed to initialize Supabase client:', err.message);
+  }
 }
 
 // ============================================================================
