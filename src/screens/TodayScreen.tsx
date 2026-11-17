@@ -19,6 +19,8 @@ import { HabitSection } from '../components/HabitSection';
 import { DayReflection } from '../components/DayReflection';
 import { CalendarModal } from '../components/CalendarModal';
 import { CatchupRadarCard } from '../components/CatchupRadarCard';
+import { AIPromptModal } from '../components/AIPromptModal';
+import { generateDayStudyPrompt } from '../utils/aiPromptGenerator';
 import { getPrevDate, getNextDate, getDayNumber } from '../utils/date';
 import { getTaskCompletedEffort } from '../utils/submodules';
 
@@ -56,6 +58,7 @@ export const TodayScreen: React.FC<TodayScreenProps> = ({
   const completedAllTasksCount = allTasks.filter((t) => t.completed).length;
   const todayTasksCompletedCount = tasks.filter((t) => t.completed).length;
   const [calendarVisible, setCalendarVisible] = useState<boolean>(false);
+  const [promptModalVisible, setPromptModalVisible] = useState<boolean>(false);
 
   // Calculate effort in minutes based on tasks and submodules
   const totalEffortMinutes = tasks.reduce((sum, t) => sum + (t.durationMinutes || 0), 0);
@@ -260,6 +263,31 @@ export const TodayScreen: React.FC<TodayScreenProps> = ({
             onSelectDate={onSelectDate}
           />
 
+          {/* AI Prompt Generator Card */}
+          {tasks.length > 0 && (
+            <TouchableOpacity
+              style={styles.aiPromptCard}
+              onPress={() => setPromptModalVisible(true)}
+              activeOpacity={0.8}
+            >
+              <View style={styles.aiPromptLeft}>
+                <View style={styles.aiPromptIconBadge}>
+                  <Ionicons name="sparkles" size={16} color={colors.accentFlow} />
+                </View>
+                <View style={styles.aiPromptTextCol}>
+                  <Text style={styles.aiPromptTitle}>Generate AI Study Prompt</Text>
+                  <Text style={styles.aiPromptDesc} numberOfLines={1}>
+                    Creates prompt for ChatGPT / Claude: steps, code & doc notes
+                  </Text>
+                </View>
+              </View>
+              <View style={styles.aiPromptRightBtn}>
+                <Ionicons name="copy-outline" size={13} color="#0B1220" />
+                <Text style={styles.aiPromptRightBtnText}>Prompt</Text>
+              </View>
+            </TouchableOpacity>
+          )}
+
           {/* Today's Tasks Section */}
           <View style={styles.sectionHeader}>
             <View style={styles.sectionTitleRow}>
@@ -319,6 +347,14 @@ export const TodayScreen: React.FC<TodayScreenProps> = ({
         onSelectDate={onSelectDate}
         allTasks={allTasks}
         completions={completion ? { [currentDate]: completion } : {}}
+      />
+
+      {/* AI Prompt Generator Modal */}
+      <AIPromptModal
+        visible={promptModalVisible}
+        onClose={() => setPromptModalVisible(false)}
+        dateStr={currentDate}
+        promptText={generateDayStudyPrompt(currentDate, tasks)}
       />
     </View>
   );
@@ -434,5 +470,60 @@ const styles = StyleSheet.create({
     fontSize: 12,
     textAlign: 'center',
     marginTop: 4,
+  },
+  aiPromptCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    backgroundColor: colors.bgRaised,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: 'rgba(0, 212, 170, 0.3)',
+    paddingHorizontal: 12,
+    paddingVertical: 10,
+    marginHorizontal: 16,
+    marginBottom: 14,
+    gap: 8,
+  },
+  aiPromptLeft: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+    flex: 1,
+  },
+  aiPromptIconBadge: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    backgroundColor: 'rgba(0, 212, 170, 0.12)',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  aiPromptTextCol: {
+    flex: 1,
+  },
+  aiPromptTitle: {
+    color: colors.fgPrimary,
+    fontSize: 13,
+    fontWeight: '700',
+  },
+  aiPromptDesc: {
+    color: colors.fgSubtle,
+    fontSize: 11,
+    marginTop: 2,
+  },
+  aiPromptRightBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    backgroundColor: colors.accentFlow,
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+    borderRadius: 8,
+  },
+  aiPromptRightBtnText: {
+    color: '#0B1220',
+    fontSize: 12,
+    fontWeight: '700',
   },
 });
