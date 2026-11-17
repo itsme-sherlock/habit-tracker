@@ -30,7 +30,8 @@
     "android": "expo start --android",
     "ios": "expo start --ios",
     "web": "expo start --web",
-    "mcp": "node scripts/mcp-server.js"
+    "mcp": "node scripts/mcp-server.js",
+    "mcp:http": "node scripts/mcp-server.js --http"
   },
   "private": true
 }
