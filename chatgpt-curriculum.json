@@ -1,0 +1,1588 @@
+{
+  "2026-11-01": [
+    {
+      "date": "2026-11-01",
+      "title": "Learn: [Core] BigQuery architecture, partitioning, clustering",
+      "description": "BigQuery docs: storage, partitioned and clustered tables",
+      "durationMinutes": 150,
+      "category": "study",
+      "completed": false
+    },
+    {
+      "date": "2026-11-01",
+      "title": "Hands-on: [Core] BigQuery architecture, partitioning, clustering",
+      "description": "Quick setup (1 hr): project, budget alert, sample EDI files in GCS. Then partition + cluster a table; compare bytes processed before/after\n\nOutput: Runnable code/query or concise notes; capture one interview explanation and one common failure mode.",
+      "durationMinutes": 240,
+      "category": "practice",
+      "completed": false
+    },
+    {
+      "date": "2026-11-01",
+      "title": "Python + SQL + interview drills",
+      "description": "Python (30 min): Parse CSV to dicts, validate required fields | SQL (30 min): 2 problems on joins + aggregations | Interview (30 min): answer 5 questions aloud on 'BigQuery architecture, partitioning, clustering'. | Optional: Notes: on-demand vs editions/slots",
+      "durationMinutes": 90,
+      "category": "review",
+      "completed": false
+    }
+  ],
+  "2026-11-02": [
+    {
+      "date": "2026-11-02",
+      "title": "Learn: [Core] BigQuery cost and query tuning",
+      "description": "BigQuery docs: query plan, cost optimization best practices",
+      "durationMinutes": 75,
+      "category": "study",
+      "completed": false
+    },
+    {
+      "date": "2026-11-02",
+      "title": "Hands-on: [Core] BigQuery cost and query tuning",
+      "description": "Dry-run queries; read execution graph; query INFORMATION_SCHEMA jobs; Job-market task (20 min): save 5 GCP Data Engineer JDs and list repeated requirements\n\nOutput: Runnable code/query or concise notes; capture one interview explanation and one common failure mode.",
+      "durationMinutes": 120,
+      "category": "practice",
+      "completed": false
+    },
+    {
+      "date": "2026-11-02",
+      "title": "Python + SQL + interview drills",
+      "description": "Python (15 min): Flatten nested JSON (recursion) | SQL (15 min): 2 problems on window functions | Interview (15 min): answer 5 questions aloud on 'BigQuery cost and query tuning'. | Optional: Drill: 'why is this query expensive?' (5 cases)",
+      "durationMinutes": 45,
+      "category": "review",
+      "completed": false
+    }
+  ],
+  "2026-11-03": [
+    {
+      "date": "2026-11-03",
+      "title": "Learn: [Core] MERGE, upserts, SCD",
+      "description": "BigQuery docs: MERGE; SCD Type 1/2 pattern",
+      "durationMinutes": 75,
+      "category": "study",
+      "completed": false
+    },
+    {
+      "date": "2026-11-03",
+      "title": "Hands-on: [Core] MERGE, upserts, SCD",
+      "description": "Write MERGE from staging into container_tracking; try SCD2 on a dimension\n\nOutput: Runnable code/query or concise notes; capture one interview explanation and one common failure mode.",
+      "durationMinutes": 120,
+      "category": "practice",
+      "completed": false
+    },
+    {
+      "date": "2026-11-03",
+      "title": "Python + SQL + interview drills",
+      "description": "Python (15 min): Custom exceptions + retry decorator | SQL (15 min): 2 problems on CTEs + subqueries | Interview (15 min): answer 5 questions aloud on 'MERGE, upserts, SCD'. | Optional: Flashcards: MERGE vs INSERT/UPDATE",
+      "durationMinutes": 45,
+      "category": "review",
+      "completed": false
+    }
+  ],
+  "2026-11-04": [
+    {
+      "date": "2026-11-04",
+      "title": "Learn: [Core] Views, UDFs, scripting",
+      "description": "BigQuery docs: views, materialized views, routines, scripting",
+      "durationMinutes": 75,
+      "category": "study",
+      "completed": false
+    },
+    {
+      "date": "2026-11-04",
+      "title": "Hands-on: [Core] Views, UDFs, scripting",
+      "description": "Build views + a stored procedure; scheduled query\n\nOutput: Runnable code/query or concise notes; capture one interview explanation and one common failure mode.",
+      "durationMinutes": 120,
+      "category": "practice",
+      "completed": false
+    },
+    {
+      "date": "2026-11-04",
+      "title": "Python + SQL + interview drills",
+      "description": "Python (15 min): Generators: stream a large file line by line | SQL (15 min): 2 problems on dedup (latest record per key) | Interview (15 min): answer 5 questions aloud on 'Views, UDFs, scripting'. | Optional: Notes: BigQuery scripting vs PL/SQL packages",
+      "durationMinutes": 45,
+      "category": "review",
+      "completed": false
+    }
+  ],
+  "2026-11-05": [
+    {
+      "date": "2026-11-05",
+      "title": "Learn: [Core] Loading and streaming data",
+      "description": "BigQuery docs: batch load, Storage Write API, time travel",
+      "durationMinutes": 75,
+      "category": "study",
+      "completed": false
+    },
+    {
+      "date": "2026-11-05",
+      "title": "Hands-on: [Core] Loading and streaming data",
+      "description": "Compare batch load vs streaming insert; table snapshots\n\nOutput: Runnable code/query or concise notes; capture one interview explanation and one common failure mode.",
+      "durationMinutes": 120,
+      "category": "practice",
+      "completed": false
+    },
+    {
+      "date": "2026-11-05",
+      "title": "Python + SQL + interview drills",
+      "description": "Python (15 min): dict/defaultdict/Counter group-by | SQL (15 min): 2 problems on MERGE + incremental loads | Interview (15 min): answer 5 questions aloud on 'Loading and streaming data'. | Optional: Notes: load options and when to use each",
+      "durationMinutes": 45,
+      "category": "review",
+      "completed": false
+    }
+  ],
+  "2026-11-06": [
+    {
+      "date": "2026-11-06",
+      "title": "Learn: [Core] BigQuery interview drill",
+      "description": "Interview-question video: BigQuery and Composer (The Data Engineering Experience)",
+      "durationMinutes": 75,
+      "category": "study",
+      "completed": false
+    },
+    {
+      "date": "2026-11-06",
+      "title": "Hands-on: [Core] BigQuery interview drill",
+      "description": "BUFFER (first 2 hrs): catch up on anything missed this week. If nothing is missed, do: Answer 25 BigQuery questions out loud, timed\n\nOutput: Timed verbal answers recorded; gaps written down; weak answers revisited within 48 hours.",
+      "durationMinutes": 120,
+      "category": "practice",
+      "completed": false
+    },
+    {
+      "date": "2026-11-06",
+      "title": "Python + SQL + interview drills",
+      "description": "Python (15 min): Reusable load_to_bigquery(file, table) function | SQL (15 min): 2 problems on SCD Type 1/2 | Interview (15 min): answer 5 questions aloud on 'BigQuery interview drill'. | Optional: Log weak topics",
+      "durationMinutes": 45,
+      "category": "review",
+      "completed": false
+    }
+  ],
+  "2026-11-07": [
+    {
+      "date": "2026-11-07",
+      "title": "Learn: [Core] Week 1 project slice + checkpoint",
+      "description": "Revise Week 1 notes",
+      "durationMinutes": 150,
+      "category": "study",
+      "completed": false
+    },
+    {
+      "date": "2026-11-07",
+      "title": "Hands-on: [Core] Week 1 project slice + checkpoint",
+      "description": "Project slice 1: EDI files in GCS, staging table, validation rules, MERGE into container_tracking + reject table\n\nOutput: Milestone 1 evidence: raw sample EDI in GCS/local; parser output; staging schema; validation + reject handling; repeat run produces no duplicate records.",
+      "durationMinutes": 240,
+      "category": "practice",
+      "completed": false
+    },
+    {
+      "date": "2026-11-07",
+      "title": "Python + SQL + interview drills",
+      "description": "Python (30 min): Mini test: 5 data-wrangling problems (40 min) | SQL (30 min): 2 problems on gaps and islands | Record a 5-min no-notes explanation of this week and watch it back; then 5 questions aloud on 'Week 1 project slice + checkpoint' (30 min). | Optional: One-page BigQuery cheat sheet + 20-question quiz",
+      "durationMinutes": 90,
+      "category": "review",
+      "completed": false
+    }
+  ],
+  "2026-11-08": [
+    {
+      "date": "2026-11-08",
+      "title": "Learn: [Core] Pub/Sub",
+      "description": "Skills Boost (Data Engineer path): Pub/Sub / streaming module",
+      "durationMinutes": 150,
+      "category": "study",
+      "completed": false
+    },
+    {
+      "date": "2026-11-08",
+      "title": "Hands-on: [Core] Pub/Sub",
+      "description": "Python publisher/subscriber; dead-letter topic; BigQuery subscription\n\nOutput: Runnable code/query or concise notes; capture one interview explanation and one common failure mode.",
+      "durationMinutes": 240,
+      "category": "practice",
+      "completed": false
+    },
+    {
+      "date": "2026-11-08",
+      "title": "Python + SQL + interview drills",
+      "description": "Python (30 min): Messages as JSON + dataclasses | SQL (30 min): 2 problems on partition pruning + query cost | Interview (30 min): answer 5 questions aloud on 'Pub/Sub'. | Optional: Notes: Oracle AQ vs Pub/Sub",
+      "durationMinutes": 90,
+      "category": "review",
+      "completed": false
+    }
+  ],
+  "2026-11-09": [
+    {
+      "date": "2026-11-09",
+      "title": "Learn: [Core] Streaming concepts",
+      "description": "Beam docs: windowing, watermarks, triggers",
+      "durationMinutes": 75,
+      "category": "study",
+      "completed": false
+    },
+    {
+      "date": "2026-11-09",
+      "title": "Hands-on: [Core] Streaming concepts",
+      "description": "Draw event time vs processing time with late-data example\n\nOutput: Runnable code/query or concise notes; capture one interview explanation and one common failure mode.",
+      "durationMinutes": 120,
+      "category": "practice",
+      "completed": false
+    },
+    {
+      "date": "2026-11-09",
+      "title": "Python + SQL + interview drills",
+      "description": "Python (15 min): Dedup an event stream with set/dict | SQL (15 min): 2 problems on joins + aggregations | Interview (15 min): answer 5 questions aloud on 'Streaming concepts'. | Optional: Flashcards: window types",
+      "durationMinutes": 45,
+      "category": "review",
+      "completed": false
+    }
+  ],
+  "2026-11-10": [
+    {
+      "date": "2026-11-10",
+      "title": "Learn: [Core] Apache Beam basics",
+      "description": "Beam Python SDK programming guide",
+      "durationMinutes": 75,
+      "category": "study",
+      "completed": false
+    },
+    {
+      "date": "2026-11-10",
+      "title": "Hands-on: [Core] Apache Beam basics",
+      "description": "Write a Beam pipeline: ParDo, GroupByKey, run on DirectRunner\n\nOutput: Runnable code/query or concise notes; capture one interview explanation and one common failure mode.",
+      "durationMinutes": 120,
+      "category": "practice",
+      "completed": false
+    },
+    {
+      "date": "2026-11-10",
+      "title": "Python + SQL + interview drills",
+      "description": "Python (15 min): Bucket events into time windows by hand | SQL (15 min): 2 problems on window functions | Interview (15 min): answer 5 questions aloud on 'Apache Beam basics'. | Optional: 5 Beam questions",
+      "durationMinutes": 45,
+      "category": "review",
+      "completed": false
+    }
+  ],
+  "2026-11-11": [
+    {
+      "date": "2026-11-11",
+      "title": "Learn: [Core] Dataflow batch",
+      "description": "Skills Boost (Data Engineer path): Dataflow module",
+      "durationMinutes": 75,
+      "category": "study",
+      "completed": false
+    },
+    {
+      "date": "2026-11-11",
+      "title": "Hands-on: [Core] Dataflow batch",
+      "description": "Run batch Beam pipeline GCS to BigQuery on Dataflow; try a template\n\nOutput: Runnable code/query or concise notes; capture one interview explanation and one common failure mode.",
+      "durationMinutes": 120,
+      "category": "practice",
+      "completed": false
+    },
+    {
+      "date": "2026-11-11",
+      "title": "Python + SQL + interview drills",
+      "description": "Python (15 min): Retry with exponential backoff | SQL (15 min): 2 problems on CTEs + subqueries | Interview (15 min): answer 5 questions aloud on 'Dataflow batch'. | Optional: Notes: Dataflow autoscaling, templates",
+      "durationMinutes": 45,
+      "category": "review",
+      "completed": false
+    }
+  ],
+  "2026-11-12": [
+    {
+      "date": "2026-11-12",
+      "title": "Learn: [Core] Dataflow streaming",
+      "description": "Dataflow docs: streaming pipelines",
+      "durationMinutes": 75,
+      "category": "study",
+      "completed": false
+    },
+    {
+      "date": "2026-11-12",
+      "title": "Hands-on: [Core] Dataflow streaming",
+      "description": "Pub/Sub to Dataflow to BigQuery with windowing and dead-letter output\n\nOutput: Runnable code/query or concise notes; capture one interview explanation and one common failure mode.",
+      "durationMinutes": 120,
+      "category": "practice",
+      "completed": false
+    },
+    {
+      "date": "2026-11-12",
+      "title": "Python + SQL + interview drills",
+      "description": "Python (15 min): Beam-style pure functions (DoFn thinking) | SQL (15 min): 2 problems on dedup (latest record per key) | Interview (15 min): answer 5 questions aloud on 'Dataflow streaming'. | Optional: Notes: failure handling",
+      "durationMinutes": 45,
+      "category": "review",
+      "completed": false
+    }
+  ],
+  "2026-11-13": [
+    {
+      "date": "2026-11-13",
+      "title": "Learn: [Core] Exactly-once, idempotency, dedup",
+      "description": "Dataflow/Pub/Sub docs: delivery semantics",
+      "durationMinutes": 75,
+      "category": "study",
+      "completed": false
+    },
+    {
+      "date": "2026-11-13",
+      "title": "Hands-on: [Core] Exactly-once, idempotency, dedup",
+      "description": "BUFFER (first 2 hrs): catch up on anything missed this week. If nothing is missed, do: Add dedup by message/event id; replay test\n\nOutput: Runnable code/query or concise notes; capture one interview explanation and one common failure mode.",
+      "durationMinutes": 120,
+      "category": "practice",
+      "completed": false
+    },
+    {
+      "date": "2026-11-13",
+      "title": "Python + SQL + interview drills",
+      "description": "Python (15 min): Idempotent processing function | SQL (15 min): 2 problems on MERGE + incremental loads | Interview (15 min): answer 5 questions aloud on 'Exactly-once, idempotency, dedup'. | Optional: Drill: 25 streaming questions",
+      "durationMinutes": 45,
+      "category": "review",
+      "completed": false
+    }
+  ],
+  "2026-11-14": [
+    {
+      "date": "2026-11-14",
+      "title": "Learn: [Core] Week 2 project slice + checkpoint",
+      "description": "Revise Week 2 notes",
+      "durationMinutes": 150,
+      "category": "study",
+      "completed": false
+    },
+    {
+      "date": "2026-11-14",
+      "title": "Hands-on: [Core] Week 2 project slice + checkpoint",
+      "description": "Project slice 2: depot events via Pub/Sub, Dataflow streaming into BigQuery, DLQ for invalid events | Last 45 min: first draft of your resume (GCP skills + project bullets).\n\nOutput: Milestone 2 evidence: Pub/Sub publisher/subscriber; message schema; retry + dead-letter handling; duplicate event test.",
+      "durationMinutes": 240,
+      "category": "practice",
+      "completed": false
+    },
+    {
+      "date": "2026-11-14",
+      "title": "Python + SQL + interview drills",
+      "description": "Python (30 min): Mini test: 5 event-processing problems | SQL (30 min): 2 problems on SCD Type 1/2 | Record a 5-min no-notes explanation of this week and watch it back; then 5 questions aloud on 'Week 2 project slice + checkpoint' (30 min). | Optional: Self-quiz: Pub/Sub + Dataflow",
+      "durationMinutes": 90,
+      "category": "review",
+      "completed": false
+    }
+  ],
+  "2026-11-15": [
+    {
+      "date": "2026-11-15",
+      "title": "Learn: [Core] Airflow concepts (run locally first)",
+      "description": "Apache Airflow docs: core concepts, tutorial",
+      "durationMinutes": 150,
+      "category": "study",
+      "completed": false
+    },
+    {
+      "date": "2026-11-15",
+      "title": "Hands-on: [Core] Airflow concepts (run locally first)",
+      "description": "Run Airflow locally in Docker (avoids Composer cost); first DAG\n\nOutput: Runnable code/query or concise notes; capture one interview explanation and one common failure mode.",
+      "durationMinutes": 240,
+      "category": "practice",
+      "completed": false
+    },
+    {
+      "date": "2026-11-15",
+      "title": "Python + SQL + interview drills",
+      "description": "Python (30 min): Callable for PythonOperator | SQL (30 min): 2 problems on gaps and islands | Interview (30 min): answer 5 questions aloud on 'Airflow concepts (run locally first)'. | Optional: Notes: DAG, task, operator, sensor, XCom",
+      "durationMinutes": 90,
+      "category": "review",
+      "completed": false
+    }
+  ],
+  "2026-11-16": [
+    {
+      "date": "2026-11-16",
+      "title": "Learn: [Core] Airflow GCP operators",
+      "description": "Airflow Google provider docs",
+      "durationMinutes": 75,
+      "category": "study",
+      "completed": false
+    },
+    {
+      "date": "2026-11-16",
+      "title": "Hands-on: [Core] Airflow GCP operators",
+      "description": "DAG: sensor on GCS file, then BigQuery job operator\n\nOutput: Runnable code/query or concise notes; capture one interview explanation and one common failure mode.",
+      "durationMinutes": 120,
+      "category": "practice",
+      "completed": false
+    },
+    {
+      "date": "2026-11-16",
+      "title": "Python + SQL + interview drills",
+      "description": "Python (15 min): Read/write GCS with the client library | SQL (15 min): 2 problems on partition pruning + query cost | Interview (15 min): answer 5 questions aloud on 'Airflow GCP operators'. | Optional: 5 Airflow questions",
+      "durationMinutes": 45,
+      "category": "review",
+      "completed": false
+    }
+  ],
+  "2026-11-17": [
+    {
+      "date": "2026-11-17",
+      "title": "Learn: [Core] DAG design: retries, backfill, SLA",
+      "description": "Airflow docs: scheduling, catchup, retries",
+      "durationMinutes": 75,
+      "category": "study",
+      "completed": false
+    },
+    {
+      "date": "2026-11-17",
+      "title": "Hands-on: [Core] DAG design: retries, backfill, SLA",
+      "description": "Add retries, alerts, backfill test; task groups\n\nOutput: Runnable code/query or concise notes; capture one interview explanation and one common failure mode.",
+      "durationMinutes": 120,
+      "category": "practice",
+      "completed": false
+    },
+    {
+      "date": "2026-11-17",
+      "title": "Python + SQL + interview drills",
+      "description": "Python (15 min): Logging + error handling in tasks | SQL (15 min): 2 problems on joins + aggregations | Interview (15 min): answer 5 questions aloud on 'DAG design: retries, backfill, SLA'. | Optional: Notes: idempotent DAGs",
+      "durationMinutes": 45,
+      "category": "review",
+      "completed": false
+    }
+  ],
+  "2026-11-18": [
+    {
+      "date": "2026-11-18",
+      "title": "Learn: [Working] Cloud Functions, Cloud Run, Eventarc",
+      "description": "Cloud Run functions + Eventarc docs",
+      "durationMinutes": 75,
+      "category": "study",
+      "completed": false
+    },
+    {
+      "date": "2026-11-18",
+      "title": "Hands-on: [Working] Cloud Functions, Cloud Run, Eventarc",
+      "description": "GCS-arrival trigger that starts validation\n\nOutput: Runnable code/query or concise notes; capture one interview explanation and one common failure mode.",
+      "durationMinutes": 120,
+      "category": "practice",
+      "completed": false
+    },
+    {
+      "date": "2026-11-18",
+      "title": "Python + SQL + interview drills",
+      "description": "Python (15 min): Config-driven code (JSON/YAML config) | SQL (15 min): 2 problems on window functions | Interview (15 min): answer 5 questions aloud on 'Cloud Functions, Cloud Run, Eventarc'. | Optional: Notes: when to use Functions vs Run vs Dataflow",
+      "durationMinutes": 45,
+      "category": "review",
+      "completed": false
+    }
+  ],
+  "2026-11-19": [
+    {
+      "date": "2026-11-19",
+      "title": "Learn: [Core] Cloud Composer",
+      "description": "Skills Boost (Data Engineer path): Composer module",
+      "durationMinutes": 75,
+      "category": "study",
+      "completed": false
+    },
+    {
+      "date": "2026-11-19",
+      "title": "Hands-on: [Core] Cloud Composer",
+      "description": "Deploy a small Composer env, upload DAG, then DELETE the env (cost)\n\nOutput: Runnable code/query or concise notes; capture one interview explanation and one common failure mode.",
+      "durationMinutes": 120,
+      "category": "practice",
+      "completed": false
+    },
+    {
+      "date": "2026-11-19",
+      "title": "Python + SQL + interview drills",
+      "description": "Python (15 min): datetime, timezones, partition dates | SQL (15 min): 2 problems on CTEs + subqueries | Interview (15 min): answer 5 questions aloud on 'Cloud Composer'. | Optional: Notes: Composer sizing and monitoring",
+      "durationMinutes": 45,
+      "category": "review",
+      "completed": false
+    }
+  ],
+  "2026-11-20": [
+    {
+      "date": "2026-11-20",
+      "title": "Learn: [Core] Composer / Airflow interview drill",
+      "description": "Interview-question video: BigQuery and Composer (The Data Engineering Experience)",
+      "durationMinutes": 75,
+      "category": "study",
+      "completed": false
+    },
+    {
+      "date": "2026-11-20",
+      "title": "Hands-on: [Core] Composer / Airflow interview drill",
+      "description": "BUFFER (first 2 hrs): catch up on anything missed this week. If nothing is missed, do: Answer 25 Airflow questions out loud\n\nOutput: Timed verbal answers recorded; gaps written down; weak answers revisited within 48 hours.",
+      "durationMinutes": 120,
+      "category": "practice",
+      "completed": false
+    },
+    {
+      "date": "2026-11-20",
+      "title": "Python + SQL + interview drills",
+      "description": "Python (15 min): Unit-test an ETL function with pytest | SQL (15 min): 2 problems on dedup (latest record per key) | Interview (15 min): answer 5 questions aloud on 'Composer / Airflow interview drill'. | Optional: Log weak topics",
+      "durationMinutes": 45,
+      "category": "review",
+      "completed": false
+    }
+  ],
+  "2026-11-21": [
+    {
+      "date": "2026-11-21",
+      "title": "Learn: [Core] Week 3 project slice + checkpoint",
+      "description": "Revise Week 3 notes",
+      "durationMinutes": 150,
+      "category": "study",
+      "completed": false
+    },
+    {
+      "date": "2026-11-21",
+      "title": "Hands-on: [Core] Week 3 project slice + checkpoint",
+      "description": "Project slice 3: DAG orchestrating arrival, validation, MERGE; failure alert\n\nOutput: Milestone 3 evidence: Beam pipeline on DirectRunner/Dataflow as planned; event-time windowing; late data; BigQuery sink; failure/replay test.",
+      "durationMinutes": 240,
+      "category": "practice",
+      "completed": false
+    },
+    {
+      "date": "2026-11-21",
+      "title": "Python + SQL + interview drills",
+      "description": "Python (30 min): Mini test: 5 ETL function problems | SQL (30 min): 2 problems on MERGE + incremental loads | Record a 5-min no-notes explanation of this week and watch it back; then 5 questions aloud on 'Week 3 project slice + checkpoint' (30 min). | Optional: Self-quiz: orchestration",
+      "durationMinutes": 90,
+      "category": "review",
+      "completed": false
+    }
+  ],
+  "2026-11-22": [
+    {
+      "date": "2026-11-22",
+      "title": "Learn: [Working] PySpark core + Dataproc",
+      "description": "Skills Boost (Data Engineer path): Dataproc module; Spark docs: DataFrames",
+      "durationMinutes": 150,
+      "category": "study",
+      "completed": false
+    },
+    {
+      "date": "2026-11-22",
+      "title": "Hands-on: [Working] PySpark core + Dataproc",
+      "description": "Run a PySpark job on Dataproc (serverless if available)\n\nOutput: Runnable code/query or concise notes; capture one interview explanation and one common failure mode.",
+      "durationMinutes": 240,
+      "category": "practice",
+      "completed": false
+    },
+    {
+      "date": "2026-11-22",
+      "title": "Python + SQL + interview drills",
+      "description": "Python (30 min): Same transformation in pandas vs PySpark | SQL (30 min): 2 problems on SCD Type 1/2 | Interview (30 min): answer 5 questions aloud on 'PySpark core + Dataproc'. | Optional: Notes: transformations vs actions",
+      "durationMinutes": 90,
+      "category": "review",
+      "completed": false
+    }
+  ],
+  "2026-11-23": [
+    {
+      "date": "2026-11-23",
+      "title": "Learn: [Working] Spark performance, tool choice",
+      "description": "Spark docs: tuning; Dataproc vs Dataflow vs BigQuery",
+      "durationMinutes": 75,
+      "category": "study",
+      "completed": false
+    },
+    {
+      "date": "2026-11-23",
+      "title": "Hands-on: [Working] Spark performance, tool choice",
+      "description": "Broadcast join vs shuffle join experiment; skew example\n\nOutput: Runnable code/query or concise notes; capture one interview explanation and one common failure mode.",
+      "durationMinutes": 120,
+      "category": "practice",
+      "completed": false
+    },
+    {
+      "date": "2026-11-23",
+      "title": "Python + SQL + interview drills",
+      "description": "Python (15 min): lambda, map/filter, sorted with key | SQL (15 min): 2 problems on gaps and islands | Interview (15 min): answer 5 questions aloud on 'Spark performance, tool choice'. | Optional: Table: when to use which tool",
+      "durationMinutes": 45,
+      "category": "review",
+      "completed": false
+    }
+  ],
+  "2026-11-24": [
+    {
+      "date": "2026-11-24",
+      "title": "Learn: [Working] Dataform (or dbt)",
+      "description": "Dataform docs: getting started, assertions",
+      "durationMinutes": 75,
+      "category": "study",
+      "completed": false
+    },
+    {
+      "date": "2026-11-24",
+      "title": "Hands-on: [Working] Dataform (or dbt)",
+      "description": "Rebuild staging-to-clean transformation as Dataform models with assertions\n\nOutput: Runnable code/query or concise notes; capture one interview explanation and one common failure mode.",
+      "durationMinutes": 120,
+      "category": "practice",
+      "completed": false
+    },
+    {
+      "date": "2026-11-24",
+      "title": "Python + SQL + interview drills",
+      "description": "Python (15 min): itertools + collections | SQL (15 min): 2 problems on partition pruning + query cost | Interview (15 min): answer 5 questions aloud on 'Dataform (or dbt)'. | Optional: Notes: Dataform vs dbt vs Composer",
+      "durationMinutes": 45,
+      "category": "review",
+      "completed": false
+    }
+  ],
+  "2026-11-25": [
+    {
+      "date": "2026-11-25",
+      "title": "Learn: [Working] Data modelling",
+      "description": "Kimball star-schema primer; BigQuery schema design docs",
+      "durationMinutes": 75,
+      "category": "study",
+      "completed": false
+    },
+    {
+      "date": "2026-11-25",
+      "title": "Hands-on: [Working] Data modelling",
+      "description": "Design facts/dims for container tracking; SCD2 for equipment\n\nOutput: Runnable code/query or concise notes; capture one interview explanation and one common failure mode.",
+      "durationMinutes": 120,
+      "category": "practice",
+      "completed": false
+    },
+    {
+      "date": "2026-11-25",
+      "title": "Python + SQL + interview drills",
+      "description": "Python (15 min): Decorators + context managers | SQL (15 min): 2 problems on joins + aggregations | Interview (15 min): answer 5 questions aloud on 'Data modelling'. | Optional: Notes: normalize vs denormalize in BigQuery",
+      "durationMinutes": 45,
+      "category": "review",
+      "completed": false
+    }
+  ],
+  "2026-11-26": [
+    {
+      "date": "2026-11-26",
+      "title": "Learn: [Working] File formats, BigLake, lakehouse",
+      "description": "BigLake and Iceberg docs (overview)",
+      "durationMinutes": 75,
+      "category": "study",
+      "completed": false
+    },
+    {
+      "date": "2026-11-26",
+      "title": "Hands-on: [Working] File formats, BigLake, lakehouse",
+      "description": "Convert CSV to Parquet; query via external table\n\nOutput: Runnable code/query or concise notes; capture one interview explanation and one common failure mode.",
+      "durationMinutes": 120,
+      "category": "practice",
+      "completed": false
+    },
+    {
+      "date": "2026-11-26",
+      "title": "Python + SQL + interview drills",
+      "description": "Python (15 min): pandas groupby/merge for data checks | SQL (15 min): 2 problems on window functions | Interview (15 min): answer 5 questions aloud on 'File formats, BigLake, lakehouse'. | Optional: Table: Avro vs Parquet vs ORC",
+      "durationMinutes": 45,
+      "category": "review",
+      "completed": false
+    }
+  ],
+  "2026-11-27": [
+    {
+      "date": "2026-11-27",
+      "title": "Learn: [Working] Spark + modelling interview drill",
+      "description": "Spark interview-question video of your choice",
+      "durationMinutes": 75,
+      "category": "study",
+      "completed": false
+    },
+    {
+      "date": "2026-11-27",
+      "title": "Hands-on: [Working] Spark + modelling interview drill",
+      "description": "BUFFER (first 2 hrs): catch up on anything missed this week. If nothing is missed, do: Answer 25 Spark/modelling questions out loud\n\nOutput: Timed verbal answers recorded; gaps written down; weak answers revisited within 48 hours.",
+      "durationMinutes": 120,
+      "category": "practice",
+      "completed": false
+    },
+    {
+      "date": "2026-11-27",
+      "title": "Python + SQL + interview drills",
+      "description": "Python (15 min): Type hints + dataclasses | SQL (15 min): 2 problems on CTEs + subqueries | Interview (15 min): answer 5 questions aloud on 'Spark + modelling interview drill'. | Optional: Log weak topics",
+      "durationMinutes": 45,
+      "category": "review",
+      "completed": false
+    }
+  ],
+  "2026-11-28": [
+    {
+      "date": "2026-11-28",
+      "title": "Learn: [Core] Week 4 project slice + checkpoint",
+      "description": "Revise Week 4 notes",
+      "durationMinutes": 150,
+      "category": "study",
+      "completed": false
+    },
+    {
+      "date": "2026-11-28",
+      "title": "Hands-on: [Core] Week 4 project slice + checkpoint",
+      "description": "Project slice 4: Dataform layers (staging, clean, marts: latest status, dwell time) + assertions\n\nOutput: Milestone 4 evidence: Composer DAG (or local Airflow first); dependencies, retries, backfill, alerts; documented runbook.",
+      "durationMinutes": 240,
+      "category": "practice",
+      "completed": false
+    },
+    {
+      "date": "2026-11-28",
+      "title": "Python + SQL + interview drills",
+      "description": "Python (15 min): Mini test: 5 mixed problems | SQL (30 min): 2 problems on dedup (latest record per key) | Mock interview 1 (45 min, record it): BigQuery, Pub/Sub, Dataflow, Composer, Python. | Optional: Self-quiz: Spark + modelling",
+      "durationMinutes": 90,
+      "category": "review",
+      "completed": false
+    }
+  ],
+  "2026-11-29": [
+    {
+      "date": "2026-11-29",
+      "title": "Learn: [Working] PySpark DataFrame API in depth",
+      "description": "Spark docs: DataFrame API, joins, window functions",
+      "durationMinutes": 150,
+      "category": "study",
+      "completed": false
+    },
+    {
+      "date": "2026-11-29",
+      "title": "Hands-on: [Working] PySpark DataFrame API in depth",
+      "description": "On Dataproc: joins, aggregations, window functions on container-tracking events\n\nOutput: Runnable code/query or concise notes; capture one interview explanation and one common failure mode.",
+      "durationMinutes": 240,
+      "category": "practice",
+      "completed": false
+    },
+    {
+      "date": "2026-11-29",
+      "title": "Python + SQL + interview drills",
+      "description": "Python (30 min): PySpark: join + window problem | SQL (30 min): 2 problems on MERGE + incremental loads | Interview (30 min): answer 5 questions aloud on 'PySpark DataFrame API in depth'. | Optional: Notes: PySpark vs BigQuery SQL for the same task",
+      "durationMinutes": 90,
+      "category": "review",
+      "completed": false
+    }
+  ],
+  "2026-11-30": [
+    {
+      "date": "2026-11-30",
+      "title": "Learn: [Working] Spark SQL + BigQuery connector",
+      "description": "spark-bigquery-connector docs",
+      "durationMinutes": 75,
+      "category": "study",
+      "completed": false
+    },
+    {
+      "date": "2026-11-30",
+      "title": "Hands-on: [Working] Spark SQL + BigQuery connector",
+      "description": "PySpark job reads GCS/BigQuery, transforms, writes back to BigQuery\n\nOutput: Runnable code/query or concise notes; capture one interview explanation and one common failure mode.",
+      "durationMinutes": 120,
+      "category": "practice",
+      "completed": false
+    },
+    {
+      "date": "2026-11-30",
+      "title": "Python + SQL + interview drills",
+      "description": "Python (15 min): PySpark: latest record per key | SQL (15 min): 2 problems on SCD Type 1/2 | Interview (15 min): answer 5 questions aloud on 'Spark SQL + BigQuery connector'. | Optional: 5 PySpark questions",
+      "durationMinutes": 45,
+      "category": "review",
+      "completed": false
+    }
+  ],
+  "2026-12-01": [
+    {
+      "date": "2026-12-01",
+      "title": "Learn: [Working] Spark internals: shuffle, skew, caching",
+      "description": "Spark docs: tuning, explain plans",
+      "durationMinutes": 75,
+      "category": "study",
+      "completed": false
+    },
+    {
+      "date": "2026-12-01",
+      "title": "Hands-on: [Working] Spark internals: shuffle, skew, caching",
+      "description": "Read explain plans; fix a skewed join; fix the small-files problem\n\nOutput: Runnable code/query or concise notes; capture one interview explanation and one common failure mode.",
+      "durationMinutes": 120,
+      "category": "practice",
+      "completed": false
+    },
+    {
+      "date": "2026-12-01",
+      "title": "Python + SQL + interview drills",
+      "description": "Python (15 min): PySpark: explode, arrays, structs | SQL (15 min): 2 problems on gaps and islands | Interview (15 min): answer 5 questions aloud on 'Spark internals: shuffle, skew, caching'. | Optional: Notes: how to explain a slow Spark job",
+      "durationMinutes": 45,
+      "category": "review",
+      "completed": false
+    }
+  ],
+  "2026-12-02": [
+    {
+      "date": "2026-12-02",
+      "title": "Learn: [Core] Structured Streaming concepts",
+      "description": "Spark docs: Structured Streaming overview",
+      "durationMinutes": 75,
+      "category": "study",
+      "completed": false
+    },
+    {
+      "date": "2026-12-02",
+      "title": "Hands-on: [Core] Structured Streaming concepts",
+      "description": "Notes + small demo: streaming vs micro-batch vs Dataflow (conceptual)\n\nOutput: Runnable code/query or concise notes; capture one interview explanation and one common failure mode.",
+      "durationMinutes": 120,
+      "category": "practice",
+      "completed": false
+    },
+    {
+      "date": "2026-12-02",
+      "title": "Python + SQL + interview drills",
+      "description": "Python (15 min): PySpark: UDF vs built-in functions | SQL (15 min): 2 problems on partition pruning + query cost | Interview (15 min): answer 5 questions aloud on 'Structured Streaming concepts'. | Optional: Table: Spark Streaming vs Dataflow vs Pub/Sub to BigQuery",
+      "durationMinutes": 45,
+      "category": "review",
+      "completed": false
+    }
+  ],
+  "2026-12-03": [
+    {
+      "date": "2026-12-03",
+      "title": "Learn: [Core] Advanced SQL interview drill 1",
+      "description": "SQL practice site of your choice",
+      "durationMinutes": 75,
+      "category": "study",
+      "completed": false
+    },
+    {
+      "date": "2026-12-03",
+      "title": "Hands-on: [Core] Advanced SQL interview drill 1",
+      "description": "Gaps-and-islands, sessionization, top-N per group, dedup (8 problems)\n\nOutput: Runnable code/query or concise notes; capture one interview explanation and one common failure mode.",
+      "durationMinutes": 120,
+      "category": "practice",
+      "completed": false
+    },
+    {
+      "date": "2026-12-03",
+      "title": "Python + SQL + interview drills",
+      "description": "Python (15 min): Regex/string parsing of EDI segments | SQL (15 min): 2 problems on joins + aggregations | Interview (15 min): answer 5 questions aloud on 'Advanced SQL interview drill 1'. | Optional: Review mistakes",
+      "durationMinutes": 45,
+      "category": "review",
+      "completed": false
+    }
+  ],
+  "2026-12-04": [
+    {
+      "date": "2026-12-04",
+      "title": "Learn: [Core] Advanced SQL drill 2 + query tuning",
+      "description": "BigQuery docs: query optimization (revisit)",
+      "durationMinutes": 75,
+      "category": "study",
+      "completed": false
+    },
+    {
+      "date": "2026-12-04",
+      "title": "Hands-on: [Core] Advanced SQL drill 2 + query tuning",
+      "description": "BUFFER (first 2 hrs): catch up on anything missed this week. If nothing is missed, do: 8 more problems; rewrite 3 slow queries and measure bytes scanned\n\nOutput: Timed verbal answers recorded; gaps written down; weak answers revisited within 48 hours.",
+      "durationMinutes": 120,
+      "category": "practice",
+      "completed": false
+    },
+    {
+      "date": "2026-12-04",
+      "title": "Python + SQL + interview drills",
+      "description": "Python (15 min): Parse an EDI-like message into JSON | SQL (15 min): 2 problems on window functions | Interview (15 min): answer 5 questions aloud on 'Advanced SQL drill 2 + query tuning'. | Optional: Log weak topics",
+      "durationMinutes": 45,
+      "category": "review",
+      "completed": false
+    }
+  ],
+  "2026-12-05": [
+    {
+      "date": "2026-12-05",
+      "title": "Learn: [Core] Week 5 project slice + checkpoint",
+      "description": "Revise Week 5 notes",
+      "durationMinutes": 150,
+      "category": "study",
+      "completed": false
+    },
+    {
+      "date": "2026-12-05",
+      "title": "Hands-on: [Core] Week 5 project slice + checkpoint",
+      "description": "Project slice 5: PySpark job to backfill historical container events into BigQuery\n\nOutput: Milestone 5 evidence: curated BigQuery model; MERGE/SCD2; partitioning/clustering; data quality checks; cost comparison.",
+      "durationMinutes": 240,
+      "category": "practice",
+      "completed": false
+    },
+    {
+      "date": "2026-12-05",
+      "title": "Python + SQL + interview drills",
+      "description": "Python (30 min): Timed: 5 PySpark/Python problems | SQL (30 min): 2 problems on CTEs + subqueries | Record a 5-min no-notes explanation of this week and watch it back; then 5 questions aloud on 'Week 5 project slice + checkpoint' (30 min). | Optional: Timed 20-problem PySpark + SQL test",
+      "durationMinutes": 90,
+      "category": "review",
+      "completed": false
+    }
+  ],
+  "2026-12-06": [
+    {
+      "date": "2026-12-06",
+      "title": "Learn: [Working] IAM, encryption, data security",
+      "description": "Cloud IAM, CMEK, policy tags docs",
+      "durationMinutes": 150,
+      "category": "study",
+      "completed": false
+    },
+    {
+      "date": "2026-12-06",
+      "title": "Hands-on: [Working] IAM, encryption, data security",
+      "description": "Least-privilege service accounts; column-level policy tag; row-level security\n\nOutput: Runnable code/query or concise notes; capture one interview explanation and one common failure mode.",
+      "durationMinutes": 240,
+      "category": "practice",
+      "completed": false
+    },
+    {
+      "date": "2026-12-06",
+      "title": "Python + SQL + interview drills",
+      "description": "Python (30 min): Automate a task with the GCP client libraries | SQL (30 min): 2 problems on dedup (latest record per key) | Interview (30 min): answer 5 questions aloud on 'IAM, encryption, data security'. | Optional: Notes: security checklist for pipelines",
+      "durationMinutes": 90,
+      "category": "review",
+      "completed": false
+    }
+  ],
+  "2026-12-07": [
+    {
+      "date": "2026-12-07",
+      "title": "Learn: [Awareness] Dataplex and governance",
+      "description": "Skills Boost (Data Engineer path): governance/Dataplex content",
+      "durationMinutes": 75,
+      "category": "study",
+      "completed": false
+    },
+    {
+      "date": "2026-12-07",
+      "title": "Hands-on: [Awareness] Dataplex and governance",
+      "description": "Explore catalog, lineage, data quality scans\n\nOutput: Runnable code/query or concise notes; capture one interview explanation and one common failure mode.",
+      "durationMinutes": 120,
+      "category": "practice",
+      "completed": false
+    },
+    {
+      "date": "2026-12-07",
+      "title": "Python + SQL + interview drills",
+      "description": "Python (15 min): Config and secrets via env vars | SQL (15 min): 2 problems on MERGE + incremental loads | Interview (15 min): answer 5 questions aloud on 'Dataplex and governance'. | Optional: Notes: governance terms",
+      "durationMinutes": 45,
+      "category": "review",
+      "completed": false
+    }
+  ],
+  "2026-12-08": [
+    {
+      "date": "2026-12-08",
+      "title": "Learn: [Working] Monitoring and logging",
+      "description": "Cloud Monitoring + Logging docs",
+      "durationMinutes": 75,
+      "category": "study",
+      "completed": false
+    },
+    {
+      "date": "2026-12-08",
+      "title": "Hands-on: [Working] Monitoring and logging",
+      "description": "Alert on failed DAG and Dataflow lag; log-based metric\n\nOutput: Runnable code/query or concise notes; capture one interview explanation and one common failure mode.",
+      "durationMinutes": 120,
+      "category": "practice",
+      "completed": false
+    },
+    {
+      "date": "2026-12-08",
+      "title": "Python + SQL + interview drills",
+      "description": "Python (15 min): Unit tests with mocks | SQL (15 min): 2 problems on SCD Type 1/2 | Interview (15 min): answer 5 questions aloud on 'Monitoring and logging'. | Optional: Notes: what to monitor in a pipeline",
+      "durationMinutes": 45,
+      "category": "review",
+      "completed": false
+    }
+  ],
+  "2026-12-09": [
+    {
+      "date": "2026-12-09",
+      "title": "Learn: [Awareness] Terraform basics",
+      "description": "Terraform Google provider docs; HashiCorp tutorial",
+      "durationMinutes": 75,
+      "category": "study",
+      "completed": false
+    },
+    {
+      "date": "2026-12-09",
+      "title": "Hands-on: [Awareness] Terraform basics",
+      "description": "Terraform buckets, dataset, Pub/Sub topics\n\nOutput: Runnable code/query or concise notes; capture one interview explanation and one common failure mode.",
+      "durationMinutes": 120,
+      "category": "practice",
+      "completed": false
+    },
+    {
+      "date": "2026-12-09",
+      "title": "Python + SQL + interview drills",
+      "description": "Python (15 min): Virtualenv + requirements hygiene | SQL (15 min): 2 problems on gaps and islands | Interview (15 min): answer 5 questions aloud on 'Terraform basics'. | Optional: Notes: state, plan, apply",
+      "durationMinutes": 45,
+      "category": "review",
+      "completed": false
+    }
+  ],
+  "2026-12-10": [
+    {
+      "date": "2026-12-10",
+      "title": "Learn: [Awareness] CI/CD and Git",
+      "description": "Cloud Build or GitHub Actions docs",
+      "durationMinutes": 75,
+      "category": "study",
+      "completed": false
+    },
+    {
+      "date": "2026-12-10",
+      "title": "Hands-on: [Awareness] CI/CD and Git",
+      "description": "Pipeline: test + deploy DAGs and Dataform on merge\n\nOutput: Runnable code/query or concise notes; capture one interview explanation and one common failure mode.",
+      "durationMinutes": 120,
+      "category": "practice",
+      "completed": false
+    },
+    {
+      "date": "2026-12-10",
+      "title": "Python + SQL + interview drills",
+      "description": "Python (15 min): argparse CLI for a pipeline step | SQL (15 min): 2 problems on partition pruning + query cost | Interview (15 min): answer 5 questions aloud on 'CI/CD and Git'. | Optional: Notes: branching, environments",
+      "durationMinutes": 45,
+      "category": "review",
+      "completed": false
+    }
+  ],
+  "2026-12-11": [
+    {
+      "date": "2026-12-11",
+      "title": "Learn: [Working] Cost, reliability, DR",
+      "description": "BigQuery editions/pricing docs; Cloud Storage lifecycle",
+      "durationMinutes": 75,
+      "category": "study",
+      "completed": false
+    },
+    {
+      "date": "2026-12-11",
+      "title": "Hands-on: [Working] Cost, reliability, DR",
+      "description": "BUFFER (first 2 hrs): catch up on anything missed this week. If nothing is missed, do: Partition expiry, lifecycle rules, budgets; review project cost\n\nOutput: Runnable code/query or concise notes; capture one interview explanation and one common failure mode.",
+      "durationMinutes": 120,
+      "category": "practice",
+      "completed": false
+    },
+    {
+      "date": "2026-12-11",
+      "title": "Python + SQL + interview drills",
+      "description": "Python (15 min): Refactor a messy ETL script | SQL (15 min): 2 problems on joins + aggregations | Interview (15 min): answer 5 questions aloud on 'Cost, reliability, DR'. | Optional: Drill: security/ops/cost questions",
+      "durationMinutes": 45,
+      "category": "review",
+      "completed": false
+    }
+  ],
+  "2026-12-12": [
+    {
+      "date": "2026-12-12",
+      "title": "Learn: [Core] Week 6 project slice + checkpoint",
+      "description": "Revise Week 6 notes",
+      "durationMinutes": 150,
+      "category": "study",
+      "completed": false
+    },
+    {
+      "date": "2026-12-12",
+      "title": "Hands-on: [Core] Week 6 project slice + checkpoint",
+      "description": "Project slice 6: Terraform + CI/CD + monitoring + policy tags on the project\n\nOutput: Milestone 6 evidence: end-to-end demo; architecture diagram; README; setup/deploy steps; known limitations; 5-minute walkthrough.",
+      "durationMinutes": 240,
+      "category": "practice",
+      "completed": false
+    },
+    {
+      "date": "2026-12-12",
+      "title": "Python + SQL + interview drills",
+      "description": "Python (30 min): Mini test: 5 problems | SQL (30 min): 2 problems on window functions | Record a 5-min no-notes explanation of this week and watch it back; then 5 questions aloud on 'Week 6 project slice + checkpoint' (30 min). | Optional: Self-quiz: security, ops, IaC",
+      "durationMinutes": 90,
+      "category": "review",
+      "completed": false
+    }
+  ],
+  "2026-12-13": [
+    {
+      "date": "2026-12-13",
+      "title": "Learn: [Core] Capstone: end-to-end run",
+      "description": "Re-read your own project notes",
+      "durationMinutes": 150,
+      "category": "study",
+      "completed": false
+    },
+    {
+      "date": "2026-12-13",
+      "title": "Hands-on: [Core] Capstone: end-to-end run",
+      "description": "Generate ~1M sample rows; run EDI to GCS to staging to validation to tracking end to end\n\nOutput: Runnable code/query or concise notes; capture one interview explanation and one common failure mode.",
+      "durationMinutes": 240,
+      "category": "practice",
+      "completed": false
+    },
+    {
+      "date": "2026-12-13",
+      "title": "Python + SQL + interview drills",
+      "description": "Python (30 min): Refactor project code into modules | SQL (30 min): 2 problems on CTEs + subqueries | Interview (30 min): answer 5 questions aloud on 'Capstone: end-to-end run'. | Optional: Fix list of gaps",
+      "durationMinutes": 90,
+      "category": "review",
+      "completed": false
+    }
+  ],
+  "2026-12-14": [
+    {
+      "date": "2026-12-14",
+      "title": "Learn: [Core] Capstone: tune and measure",
+      "description": "BigQuery cost docs (revisit)",
+      "durationMinutes": 75,
+      "category": "study",
+      "completed": false
+    },
+    {
+      "date": "2026-12-14",
+      "title": "Hands-on: [Core] Capstone: tune and measure",
+      "description": "Tune queries/partitions; record bytes scanned and runtime before/after\n\nOutput: Runnable code/query or concise notes; capture one interview explanation and one common failure mode.",
+      "durationMinutes": 120,
+      "category": "practice",
+      "completed": false
+    },
+    {
+      "date": "2026-12-14",
+      "title": "Python + SQL + interview drills",
+      "description": "Python (15 min): Add logging + error handling | SQL (15 min): 2 problems on dedup (latest record per key) | Interview (15 min): answer 5 questions aloud on 'Capstone: tune and measure'. | Optional: Write 3 'I improved X by Y' lines",
+      "durationMinutes": 45,
+      "category": "review",
+      "completed": false
+    }
+  ],
+  "2026-12-15": [
+    {
+      "date": "2026-12-15",
+      "title": "Learn: [Core] Capstone: failure scenarios",
+      "description": "Revisit exactly-once and backfill notes",
+      "durationMinutes": 75,
+      "category": "study",
+      "completed": false
+    },
+    {
+      "date": "2026-12-15",
+      "title": "Hands-on: [Core] Capstone: failure scenarios",
+      "description": "Test replay, duplicates, late events, bad files; write runbook | Last 30 min: start selective applications (shortlist roles, tailor resume, apply to the first 3).\n\nOutput: Test results: duplicate file, duplicate event, late event, malformed record",
+      "durationMinutes": 120,
+      "category": "practice",
+      "completed": false
+    },
+    {
+      "date": "2026-12-15",
+      "title": "Python + SQL + interview drills",
+      "description": "Python (15 min): Unit tests for validation functions | SQL (15 min): 2 problems on MERGE + incremental loads | Interview (15 min): answer 5 questions aloud on 'Capstone: failure scenarios'. | Optional: Notes: how you handle failures",
+      "durationMinutes": 45,
+      "category": "review",
+      "completed": false
+    }
+  ],
+  "2026-12-16": [
+    {
+      "date": "2026-12-16",
+      "title": "Learn: [Core] Architecture diagram + README",
+      "description": "Draw.io or similar",
+      "durationMinutes": 75,
+      "category": "study",
+      "completed": false
+    },
+    {
+      "date": "2026-12-16",
+      "title": "Hands-on: [Core] Architecture diagram + README",
+      "description": "Architecture diagram, README, clean GitHub repo\n\nOutput: GitHub README + architecture diagram",
+      "durationMinutes": 120,
+      "category": "practice",
+      "completed": false
+    },
+    {
+      "date": "2026-12-16",
+      "title": "Python + SQL + interview drills",
+      "description": "Python (15 min): Type hints + README examples | SQL (15 min): 2 problems on SCD Type 1/2 | Interview (15 min): answer 5 questions aloud on 'Architecture diagram + README'. | Optional: Review repo as a stranger would",
+      "durationMinutes": 45,
+      "category": "review",
+      "completed": false
+    }
+  ],
+  "2026-12-17": [
+    {
+      "date": "2026-12-17",
+      "title": "Learn: [Core] Project story for interviews",
+      "description": "Prepare answers",
+      "durationMinutes": 75,
+      "category": "study",
+      "completed": false
+    },
+    {
+      "date": "2026-12-17",
+      "title": "Hands-on: [Core] Project story for interviews",
+      "description": "Write 2-minute and 10-minute walkthroughs; Oracle to GCP mapping (AQ to Pub/Sub, staging to BigQuery)\n\nOutput: Recorded 2-min and 10-min project story",
+      "durationMinutes": 120,
+      "category": "practice",
+      "completed": false
+    },
+    {
+      "date": "2026-12-17",
+      "title": "Python + SQL + interview drills",
+      "description": "Python (15 min): Explain your code aloud | SQL (15 min): 2 problems on gaps and islands | Interview (15 min): answer 5 questions aloud on 'Project story for interviews'. | Optional: Practice aloud twice",
+      "durationMinutes": 45,
+      "category": "review",
+      "completed": false
+    }
+  ],
+  "2026-12-18": [
+    {
+      "date": "2026-12-18",
+      "title": "Learn: [Core] Explain and present",
+      "description": "Record yourself",
+      "durationMinutes": 75,
+      "category": "study",
+      "completed": false
+    },
+    {
+      "date": "2026-12-18",
+      "title": "Hands-on: [Core] Explain and present",
+      "description": "BUFFER (first 2 hrs): catch up on anything missed this week. If nothing is missed, do: Record a walkthrough; optional Looker Studio dashboard (1 hr)\n\nOutput: Recorded walkthrough + notes on gaps",
+      "durationMinutes": 120,
+      "category": "practice",
+      "completed": false
+    },
+    {
+      "date": "2026-12-18",
+      "title": "Python + SQL + interview drills",
+      "description": "Python (15 min): Mock code walkthrough | SQL (15 min): 2 problems on partition pruning + query cost | Interview (15 min): answer 5 questions aloud on 'Explain and present'. | Optional: Note filler words and gaps",
+      "durationMinutes": 45,
+      "category": "review",
+      "completed": false
+    }
+  ],
+  "2026-12-19": [
+    {
+      "date": "2026-12-19",
+      "title": "Learn: [Awareness] Alternatives + CDC",
+      "description": "Datastream and Data Fusion docs (overview)",
+      "durationMinutes": 150,
+      "category": "study",
+      "completed": false
+    },
+    {
+      "date": "2026-12-19",
+      "title": "Hands-on: [Awareness] Alternatives + CDC",
+      "description": "Notes: Datastream for Oracle CDC, Data Fusion, Dataproc alternatives; why you chose your stack\n\nOutput: Runnable code/query or concise notes; capture one interview explanation and one common failure mode.",
+      "durationMinutes": 240,
+      "category": "practice",
+      "completed": false
+    },
+    {
+      "date": "2026-12-19",
+      "title": "Python + SQL + interview drills",
+      "description": "Python (30 min): Timed: 3 coding problems | SQL (30 min): 2 problems on joins + aggregations | Record a 5-min no-notes explanation of this week and watch it back; then 5 questions aloud on 'Alternatives + CDC' (30 min). | Optional: Table: tool choice trade-offs",
+      "durationMinutes": 90,
+      "category": "review",
+      "completed": false
+    }
+  ],
+  "2026-12-20": [
+    {
+      "date": "2026-12-20",
+      "title": "Learn: [Core] System design: batch warehouse + streaming",
+      "description": "Review your architecture notes",
+      "durationMinutes": 150,
+      "category": "study",
+      "completed": false
+    },
+    {
+      "date": "2026-12-20",
+      "title": "Hands-on: [Core] System design: batch warehouse + streaming",
+      "description": "Design aloud: batch DW and streaming analytics, 2 designs, timed\n\nOutput: Runnable code/query or concise notes; capture one interview explanation and one common failure mode.",
+      "durationMinutes": 240,
+      "category": "practice",
+      "completed": false
+    },
+    {
+      "date": "2026-12-20",
+      "title": "Python + SQL + interview drills",
+      "description": "Python (30 min): Timed problem set 1 (45 min) | SQL (30 min): 2 problems on window functions | Interview (30 min): answer 5 questions aloud on 'System design: batch warehouse + streaming'. | Optional: Write the design framework you use",
+      "durationMinutes": 90,
+      "category": "review",
+      "completed": false
+    }
+  ],
+  "2026-12-21": [
+    {
+      "date": "2026-12-21",
+      "title": "Learn: [Awareness] System design: Oracle CDC / migration",
+      "description": "Datastream + migration docs (revisit)",
+      "durationMinutes": 75,
+      "category": "study",
+      "completed": false
+    },
+    {
+      "date": "2026-12-21",
+      "title": "Hands-on: [Awareness] System design: Oracle CDC / migration",
+      "description": "Design aloud: on-prem Oracle DW migration to BigQuery\n\nOutput: Runnable code/query or concise notes; capture one interview explanation and one common failure mode.",
+      "durationMinutes": 120,
+      "category": "practice",
+      "completed": false
+    },
+    {
+      "date": "2026-12-21",
+      "title": "Python + SQL + interview drills",
+      "description": "Python (15 min): Timed problem set 2 (45 min) | SQL (15 min): 2 problems on CTEs + subqueries | Interview (15 min): answer 5 questions aloud on 'System design: Oracle CDC / migration'. | Optional: Note trade-offs and risks",
+      "durationMinutes": 45,
+      "category": "review",
+      "completed": false
+    }
+  ],
+  "2026-12-22": [
+    {
+      "date": "2026-12-22",
+      "title": "Learn: [Core] SQL timed practice",
+      "description": "SQL practice site of your choice",
+      "durationMinutes": 75,
+      "category": "study",
+      "completed": false
+    },
+    {
+      "date": "2026-12-22",
+      "title": "Hands-on: [Core] SQL timed practice",
+      "description": "15 timed problems: windows, dedup, gaps-and-islands, running totals\n\nOutput: Runnable code/query or concise notes; capture one interview explanation and one common failure mode.",
+      "durationMinutes": 120,
+      "category": "practice",
+      "completed": false
+    },
+    {
+      "date": "2026-12-22",
+      "title": "Python + SQL + interview drills",
+      "description": "Python (15 min): Fix every weak spot from sets 1-2 | SQL (15 min): 2 problems on dedup (latest record per key) | Interview (15 min): answer 5 questions aloud on 'SQL timed practice'. | Optional: Review mistakes",
+      "durationMinutes": 45,
+      "category": "review",
+      "completed": false
+    }
+  ],
+  "2026-12-23": [
+    {
+      "date": "2026-12-23",
+      "title": "Learn: [Working] Python / PySpark / Beam coding drill",
+      "description": "Revisit Python + Beam notes",
+      "durationMinutes": 75,
+      "category": "study",
+      "completed": false
+    },
+    {
+      "date": "2026-12-23",
+      "title": "Hands-on: [Working] Python / PySpark / Beam coding drill",
+      "description": "Coding drill: file processing, PySpark transforms, Beam snippets\n\nOutput: Runnable code/query or concise notes; capture one interview explanation and one common failure mode.",
+      "durationMinutes": 120,
+      "category": "practice",
+      "completed": false
+    },
+    {
+      "date": "2026-12-23",
+      "title": "Python + SQL + interview drills",
+      "description": "Python (15 min): Timed problem set 3 (45 min) | SQL (15 min): 2 problems on MERGE + incremental loads | Interview (15 min): answer 5 questions aloud on 'Python / PySpark / Beam coding drill'. | Optional: Review mistakes",
+      "durationMinutes": 45,
+      "category": "review",
+      "completed": false
+    }
+  ],
+  "2026-12-24": [
+    {
+      "date": "2026-12-24",
+      "title": "Learn: [Core] Behavioural + 'tell me about yourself'",
+      "description": "Prepare answers",
+      "durationMinutes": 75,
+      "category": "study",
+      "completed": false
+    },
+    {
+      "date": "2026-12-24",
+      "title": "Hands-on: [Core] Behavioural + 'tell me about yourself'",
+      "description": "Write 5 STAR stories from your Lara work; 4-year-profile intro\n\nOutput: Runnable code/query or concise notes; capture one interview explanation and one common failure mode.",
+      "durationMinutes": 120,
+      "category": "practice",
+      "completed": false
+    },
+    {
+      "date": "2026-12-24",
+      "title": "Python + SQL + interview drills",
+      "description": "Python (15 min): Code-review a peer script aloud | SQL (15 min): 2 problems on SCD Type 1/2 | Interview (15 min): answer 5 questions aloud on 'Behavioural + 'tell me about yourself''. | Optional: Practice aloud",
+      "durationMinutes": 45,
+      "category": "review",
+      "completed": false
+    }
+  ],
+  "2026-12-25": [
+    {
+      "date": "2026-12-25",
+      "title": "Learn: [Core] Light day: weak-topic review",
+      "description": "Your weak-topic log",
+      "durationMinutes": 75,
+      "category": "study",
+      "completed": false
+    },
+    {
+      "date": "2026-12-25",
+      "title": "Hands-on: [Core] Light day: weak-topic review",
+      "description": "BUFFER (first 2 hrs): catch up on anything missed this week. If nothing is missed, do: Redo the labs you found hardest\n\nOutput: Runnable code/query or concise notes; capture one interview explanation and one common failure mode.",
+      "durationMinutes": 120,
+      "category": "practice",
+      "completed": false
+    },
+    {
+      "date": "2026-12-25",
+      "title": "Python + SQL + interview drills",
+      "description": "Python (15 min): Light: re-solve missed problems | SQL (15 min): 2 problems on gaps and islands | Interview (15 min): answer 5 questions aloud on 'Light day: weak-topic review'. | Optional: Flashcards",
+      "durationMinutes": 45,
+      "category": "review",
+      "completed": false
+    }
+  ],
+  "2026-12-26": [
+    {
+      "date": "2026-12-26",
+      "title": "Learn: [Core] Timed practice exam",
+      "description": "Google PDE sample questions + practice tests",
+      "durationMinutes": 150,
+      "category": "study",
+      "completed": false
+    },
+    {
+      "date": "2026-12-26",
+      "title": "Hands-on: [Core] Timed practice exam",
+      "description": "Take a timed practice exam; review every wrong answer\n\nOutput: Exam score + weak-topic log",
+      "durationMinutes": 240,
+      "category": "practice",
+      "completed": false
+    },
+    {
+      "date": "2026-12-26",
+      "title": "Python + SQL + interview drills",
+      "description": "Python (30 min): Timed problem set 4 (45 min) | SQL (30 min): 2 problems on partition pruning + query cost | Interview (30 min): answer 5 questions aloud on 'Timed practice exam'. | Optional: Update weak-topic log",
+      "durationMinutes": 90,
+      "category": "review",
+      "completed": false
+    }
+  ],
+  "2026-12-27": [
+    {
+      "date": "2026-12-27",
+      "title": "Learn: [Core] Mock interview 2 (technical)",
+      "description": "Mock with a friend or record yourself",
+      "durationMinutes": 150,
+      "category": "study",
+      "completed": false
+    },
+    {
+      "date": "2026-12-27",
+      "title": "Hands-on: [Core] Mock interview 2 (technical)",
+      "description": "Full technical mock; fix gaps same day\n\nOutput: Mock feedback log",
+      "durationMinutes": 240,
+      "category": "practice",
+      "completed": false
+    },
+    {
+      "date": "2026-12-27",
+      "title": "Python + SQL + interview drills",
+      "description": "Python (30 min): Timed problem set 5 | SQL (30 min): 2 problems on joins + aggregations | Interview (30 min): answer 5 questions aloud on 'Mock interview 2 (technical)'. | Optional: Notes: feedback",
+      "durationMinutes": 90,
+      "category": "review",
+      "completed": false
+    }
+  ],
+  "2026-12-28": [
+    {
+      "date": "2026-12-28",
+      "title": "Learn: [Core] Resume + LinkedIn",
+      "description": "Job postings keyword list",
+      "durationMinutes": 75,
+      "category": "study",
+      "completed": false
+    },
+    {
+      "date": "2026-12-28",
+      "title": "Hands-on: [Core] Resume + LinkedIn",
+      "description": "Update resume with GCP skills and project bullets; LinkedIn headline\n\nOutput: Updated resume + LinkedIn",
+      "durationMinutes": 120,
+      "category": "practice",
+      "completed": false
+    },
+    {
+      "date": "2026-12-28",
+      "title": "Python + SQL + interview drills",
+      "description": "Python (15 min): Fix weak spots | SQL (15 min): 2 problems on window functions | Interview (15 min): answer 5 questions aloud on 'Resume + LinkedIn'. | Optional: Peer review if possible",
+      "durationMinutes": 45,
+      "category": "review",
+      "completed": false
+    }
+  ],
+  "2026-12-29": [
+    {
+      "date": "2026-12-29",
+      "title": "Learn: [Core] Mock interview 3 (design + project)",
+      "description": "Mock with a friend or record yourself",
+      "durationMinutes": 75,
+      "category": "study",
+      "completed": false
+    },
+    {
+      "date": "2026-12-29",
+      "title": "Hands-on: [Core] Mock interview 3 (design + project)",
+      "description": "System design + project deep-dive mock\n\nOutput: Mock feedback log",
+      "durationMinutes": 120,
+      "category": "practice",
+      "completed": false
+    },
+    {
+      "date": "2026-12-29",
+      "title": "Python + SQL + interview drills",
+      "description": "Python (15 min): Timed problem set 6 | SQL (15 min): 2 problems on CTEs + subqueries | Interview (15 min): answer 5 questions aloud on 'Mock interview 3 (design + project)'. | Optional: Notes: feedback",
+      "durationMinutes": 45,
+      "category": "review",
+      "completed": false
+    }
+  ],
+  "2026-12-30": [
+    {
+      "date": "2026-12-30",
+      "title": "Learn: [Core] Final revision sheet",
+      "description": "All your notes",
+      "durationMinutes": 75,
+      "category": "study",
+      "completed": false
+    },
+    {
+      "date": "2026-12-30",
+      "title": "Hands-on: [Core] Final revision sheet",
+      "description": "One-page service comparison + top-50 question sheet\n\nOutput: One-page service comparison + top-50 question sheet",
+      "durationMinutes": 120,
+      "category": "practice",
+      "completed": false
+    },
+    {
+      "date": "2026-12-30",
+      "title": "Python + SQL + interview drills",
+      "description": "Python (15 min): Re-solve missed problems | SQL (15 min): 2 problems on dedup (latest record per key) | Interview (15 min): answer 5 questions aloud on 'Final revision sheet'. | Optional: Read it twice",
+      "durationMinutes": 45,
+      "category": "review",
+      "completed": false
+    }
+  ],
+  "2026-12-31": [
+    {
+      "date": "2026-12-31",
+      "title": "Learn: [Core] Wrap-up + application plan",
+      "description": "Light review",
+      "durationMinutes": 75,
+      "category": "study",
+      "completed": false
+    },
+    {
+      "date": "2026-12-31",
+      "title": "Hands-on: [Core] Wrap-up + application plan",
+      "description": "Review applications sent; plan the next batch and follow-ups\n\nOutput: Application tracker with next batch planned",
+      "durationMinutes": 120,
+      "category": "practice",
+      "completed": false
+    },
+    {
+      "date": "2026-12-31",
+      "title": "Python + SQL + interview drills",
+      "description": "Python (15 min): Final Python cheat sheet | SQL (15 min): 2 problems on MERGE + incremental loads | Interview (15 min): answer 5 questions aloud on 'Wrap-up + application plan'. | Optional: Rest early",
+      "durationMinutes": 45,
+      "category": "review",
+      "completed": false
+    }
+  ]
+}

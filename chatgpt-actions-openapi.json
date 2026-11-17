@@ -1,0 +1,113 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "DE60 Habit Tracker Supabase API",
+    "description": "Live cloud API for DE60 60-Day Data Engineering Habit Tracker to read and update daily study completions.",
+    "version": "1.0.0"
+  },
+  "servers": [
+    {
+      "url": "https://uxbmfsbqpqlrsftmdyfl.supabase.co/rest/v1"
+    }
+  ],
+  "paths": {
+    "/daily_completions": {
+      "get": {
+        "operationId": "getDailyCompletions",
+        "summary": "Get all study completion records",
+        "description": "Returns list of completed tasks, habits, and notes for all study days.",
+        "parameters": [
+          {
+            "name": "select",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": "*"
+            }
+          },
+          {
+            "name": "date",
+            "in": "query",
+            "required": false,
+            "description": "Filter by specific date (e.g. eq.2026-11-17)",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "date": { "type": "string" },
+                      "task_completions": { "type": "array", "items": { "type": "string" } },
+                      "habit_completions": { "type": "object" },
+                      "notes": { "type": "string" },
+                      "mood": { "type": "integer" },
+                      "updated_at": { "type": "string" }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/study_notes": {
+      "get": {
+        "operationId": "getStudyNotes",
+        "summary": "Get study notes for a specific day or topic",
+        "description": "Retrieves deep 4-YoE technical notes, failure modes, and interview Q&As.",
+        "parameters": [
+          {
+            "name": "select",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": "*"
+            }
+          },
+          {
+            "name": "date",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "date": { "type": "string" },
+                      "topic": { "type": "string" },
+                      "summary": { "type": "string" },
+                      "failure_modes": { "type": "array" },
+                      "interview_qa": { "type": "array" }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
